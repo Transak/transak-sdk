@@ -8,9 +8,6 @@
 
 #/build
 # production
-/build
-/finalBuild
-/documentation
 
 # misc
 .DS_Store
