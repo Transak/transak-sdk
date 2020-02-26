@@ -1,6 +1,6 @@
 # Transak SDK
 [![Build](https://travis-ci.org/joemccann/dillinger.svg)]()
-A JavaScript library for decentralised applications to onboard their global user base with fiat currency.
+ A JavaScript library for decentralised applications to onboard their global user base with fiat currency.
 ### Installation
 To use the Transak widget with your React application, you will need to use `[@transak/transak-sdk](https://www.npmjs.com/package/@transak/transak-sdk)` (Transak’s  JavaScript SDK).
 Add the Transak SDK as a dependency using `yarn` or `npm`:
@@ -16,8 +16,8 @@ $ npm install @transak/transak-sdk
 import transakSDK from '@transak/transak-sdk'
 
 let transak = new transakSDK({
-    apiKey: '',  // Your API Key
-    environment: 'PRODUCTION', // STAGING/PRODUCTION
+    apiKey: '4fcd6904-706b-4aff-bd9d-77422813bbb7',  // Your API Key
+    environment: 'STAGING', // STAGING/PRODUCTION
     defaultCryptoCurrency: 'ETH',
     walletAddress: '', // Your customer's wallet address
     themeColor: '000000', // App theme color
