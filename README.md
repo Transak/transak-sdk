@@ -2,7 +2,7 @@
 [![Build](https://travis-ci.org/joemccann/dillinger.svg)]()
  A JavaScript library for decentralised applications to onboard their global user base with fiat currency.
 ### Installation
-To use the Transak widget with your React application, you will need to use `[@transak/transak-sdk](https://www.npmjs.com/package/@transak/transak-sdk)` (Transak’s  JavaScript SDK).
+To use the Transak widget with your javascript application, you will need to use `[@transak/transak-sdk](https://www.npmjs.com/package/@transak/transak-sdk)` (Transak’s  JavaScript SDK).
 Add the Transak SDK as a dependency using `yarn` or `npm`:
 ```sh
 # Using yarn

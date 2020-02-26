@@ -51,6 +51,11 @@ TransakSDK.prototype.modal = async function () {
             await setStyle(this.partnerData.themeColor, width, height);
             let modal = document.getElementById("transakFiatOnOffRamp");
             let span = document.getElementsByClassName("transak_close")[0];
+
+            //Prevent background scrolling when overlay appears
+            document.documentElement.style.overflow = 'hidden';
+            document.body.scroll = "no";
+
             modal.style.display = "block";
             this.isInitialised = true;
             eventEmitter.emit(EVENTS.TRANSAK_WIDGET_INITIALISED, {
@@ -128,6 +133,11 @@ function handleMessage(event) {
                         status: true,
                         eventName: EVENTS.TRANSAK_WIDGET_CLOSE
                     });
+
+                    //enable background scrolling when overlay appears
+                    document.documentElement.style.overflow = 'scroll';
+                    document.body.scroll = "yes";
+
                     let modal = document.getElementById("transakFiatOnOffRamp");
                     modal.style.display = "none";
                     modal.innerHTML = "";
