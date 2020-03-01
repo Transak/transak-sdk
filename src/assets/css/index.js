@@ -44,7 +44,7 @@ export function getCSS(themeColor, height, width) {
 .transak_modal {
   display: block;
   width: ${width};
-  max-width: 100%;
+  max-width: 500px;
   height: ${height};
   max-height: 100%;
   position: fixed;
