@@ -100,6 +100,8 @@ async function generateURL(configData) {
                     if (configData.email) partnerData.email = configData.email;
                     if (configData.partnerOrderId) partnerData.partnerOrderId = configData.partnerOrderId;
                     if (configData.partnerCustomerId) partnerData.partnerCustomerId = configData.partnerCustomerId;
+                    if (configData.exchangeScreenTitle) partnerData.exchangeScreenTitle = configData.exchangeScreenTitle;
+                    if (configData.hideMenu) partnerData.hideMenu = configData.hideMenu;
                     if (configData.redirectURL) partnerData.redirectURL = configData.redirectURL;
                     if (configData.hostURL) partnerData.hostURL = configData.hostURL;
                     if (configData.disableWalletAddressForm) partnerData.disableWalletAddressForm = configData.disableWalletAddressForm;
