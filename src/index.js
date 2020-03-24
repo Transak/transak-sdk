@@ -1,10 +1,11 @@
 import events from 'events';
 import {config, errorsLang, EVENTS} from "./constants";
-import {fetchAPIKey} from "./utils/apiUtil";
 import {UrlEncode} from "./utils/generalUtil";
 import {closeSVGIcon} from './assets/svg';
 import {getCSS} from './assets/css';
+
 const eventEmitter = new events.EventEmitter();
+
 function TransakSDK(partnerData) {
     this.partnerData = partnerData;
     this.isInitialised = false;
@@ -12,6 +13,7 @@ function TransakSDK(partnerData) {
     this.ALL_EVENTS = '*';
     this.ERROR = 'TRANSAK_ERROR'
 }
+
 TransakSDK.prototype.on = function (type, cb) {
     if (type === this.ALL_EVENTS) {
         for (let eventName in EVENTS) {
@@ -87,26 +89,28 @@ async function generateURL(configData) {
             }
             try {
                 environment = environment.toUpperCase();
-                let partnerDataBackend = await fetchAPIKey(configData.apiKey, config.ENVIRONMENT[environment].BACKEND);
-                if (partnerDataBackend) {
-                    partnerData.apiKey = configData.apiKey;
-                    if (configData.cryptoCurrencyCode) partnerData.cryptoCurrencyCode = configData.cryptoCurrencyCode;
-                    if (configData.defaultCryptoCurrency) partnerData.defaultCryptoCurrency = configData.defaultCryptoCurrency;
-                    if (configData.walletAddress) partnerData.walletAddress = configData.walletAddress;
-                    if (configData.themeColor) partnerData.themeColor = configData.themeColor.replace("#", "");
-                    if (configData.walletAddress) partnerData.walletAddress = configData.walletAddress;
-                    if (configData.fiatAmount) partnerData.fiatAmount = configData.fiatAmount;
-                    if (configData.fiatCurrency) partnerData.fiatCurrency = configData.fiatCurrency;
-                    if (configData.email) partnerData.email = configData.email;
-                    if (configData.partnerOrderId) partnerData.partnerOrderId = configData.partnerOrderId;
-                    if (configData.partnerCustomerId) partnerData.partnerCustomerId = configData.partnerCustomerId;
-                    if (configData.exchangeScreenTitle) partnerData.exchangeScreenTitle = configData.exchangeScreenTitle;
-                    if (configData.hideMenu) partnerData.hideMenu = configData.hideMenu;
-                    if (configData.redirectURL) partnerData.redirectURL = configData.redirectURL;
-                    if (configData.hostURL) partnerData.hostURL = configData.hostURL;
-                    if (configData.disableWalletAddressForm) partnerData.disableWalletAddressForm = configData.disableWalletAddressForm;
-                    queryString = UrlEncode(partnerData);
-                }
+                // let partnerDataBackend = await fetchAPIKey(configData.apiKey, config.ENVIRONMENT[environment].BACKEND);
+                // if (partnerDataBackend) {
+                partnerData.apiKey = configData.apiKey;
+                if (configData.cryptoCurrencyCode) partnerData.cryptoCurrencyCode = configData.cryptoCurrencyCode;
+                if (configData.defaultCryptoCurrency) partnerData.defaultCryptoCurrency = configData.defaultCryptoCurrency;
+                if (configData.walletAddress) partnerData.walletAddress = configData.walletAddress;
+                if (configData.themeColor) partnerData.themeColor = configData.themeColor.replace("#", "");
+                if (configData.walletAddress) partnerData.walletAddress = configData.walletAddress;
+                if (configData.fiatAmount) partnerData.fiatAmount = configData.fiatAmount;
+                if (configData.fiatCurrency) partnerData.fiatCurrency = configData.fiatCurrency;
+                if (configData.countryCode) partnerData.countryCode = configData.countryCode;
+                if (configData.defaultPaymentMethod) partnerData.defaultPaymentMethod = configData.defaultPaymentMethod;
+                if (configData.email) partnerData.email = configData.email;
+                if (configData.partnerOrderId) partnerData.partnerOrderId = configData.partnerOrderId;
+                if (configData.partnerCustomerId) partnerData.partnerCustomerId = configData.partnerCustomerId;
+                if (configData.exchangeScreenTitle) partnerData.exchangeScreenTitle = configData.exchangeScreenTitle;
+                if (configData.hideMenu) partnerData.hideMenu = configData.hideMenu;
+                if (configData.redirectURL) partnerData.redirectURL = configData.redirectURL;
+                if (configData.hostURL) partnerData.hostURL = configData.hostURL;
+                if (configData.disableWalletAddressForm) partnerData.disableWalletAddressForm = configData.disableWalletAddressForm;
+                queryString = UrlEncode(partnerData);
+                // }
             } catch (e) {
                 throw(e)
             }
@@ -116,12 +120,14 @@ async function generateURL(configData) {
     }
     return {width, height, partnerData, url: `${config.ENVIRONMENT[environment].FRONTEND}?${queryString}`}
 }
+
 async function setStyle(themeColor, width, height) {
     let style = await document.createElement('style');
     style.innerHTML = getCSS(themeColor, height, width);
     let modal = document.getElementById("transakFiatOnOffRamp");
     if (modal) await modal.appendChild(style);
 }
+
 function handleMessage(event) {
     let environment;
     if (event.origin === config.ENVIRONMENT.DEVELOPMENT.FRONTEND) environment = config.ENVIRONMENT.DEVELOPMENT.NAME;
@@ -180,6 +186,7 @@ function handleMessage(event) {
         }
     }
 }
+
 export default TransakSDK
 
 
