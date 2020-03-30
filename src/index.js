@@ -100,6 +100,7 @@ async function generateURL(configData) {
                 if (configData.fiatAmount) partnerData.fiatAmount = configData.fiatAmount;
                 if (configData.fiatCurrency) partnerData.fiatCurrency = configData.fiatCurrency;
                 if (configData.countryCode) partnerData.countryCode = configData.countryCode;
+                if (configData.paymentMethod) partnerData.paymentMethod = configData.paymentMethod;
                 if (configData.defaultPaymentMethod) partnerData.defaultPaymentMethod = configData.defaultPaymentMethod;
                 if (configData.email) partnerData.email = configData.email;
                 if (configData.partnerOrderId) partnerData.partnerOrderId = configData.partnerOrderId;
