@@ -110,6 +110,7 @@ async function generateURL(configData) {
                 if (configData.redirectURL) partnerData.redirectURL = configData.redirectURL;
                 if (configData.hostURL) partnerData.hostURL = configData.hostURL;
                 if (configData.disableWalletAddressForm) partnerData.disableWalletAddressForm = configData.disableWalletAddressForm;
+                if (configData.cryptoCurrencyList) partnerData.cryptoCurrencyList = configData.cryptoCurrencyList.split(',');
                 queryString = UrlEncode(partnerData);
                 // }
             } catch (e) {
