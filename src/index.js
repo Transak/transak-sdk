@@ -168,6 +168,13 @@ function handleMessage(event) {
                     });
                     break;
                 }
+                case EVENTS.TRANSAK_ORDER_FAILED: {
+                    eventEmitter.emit(EVENTS.TRANSAK_ORDER_FAILED, {
+                        status: event.data.data,
+                        eventName: EVENTS.TRANSAK_ORDER_FAILED
+                    });
+                    break;
+                }
                 case EVENTS.TRANSAK_ORDER_SUCCESSFUL: {
                     eventEmitter.emit(EVENTS.TRANSAK_ORDER_SUCCESSFUL, {
                         status: event.data.data,

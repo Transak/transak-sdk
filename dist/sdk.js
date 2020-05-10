@@ -710,6 +710,7 @@ var _default = {
   TRANSAK_WIDGET_CLOSE: 'TRANSAK_WIDGET_CLOSE',
   TRANSAK_ORDER_CREATED: 'TRANSAK_ORDER_CREATED',
   TRANSAK_ORDER_CANCELLED: 'TRANSAK_ORDER_CANCELLED',
+  TRANSAK_ORDER_FAILED: 'TRANSAK_ORDER_FAILED',
   TRANSAK_ORDER_SUCCESSFUL: 'TRANSAK_ORDER_SUCCESSFUL'
 };
 exports.default = _default;
@@ -983,6 +984,15 @@ function handleMessage(event) {
             eventEmitter.emit(_constants.EVENTS.TRANSAK_ORDER_CANCELLED, {
               status: event.data.data,
               eventName: _constants.EVENTS.TRANSAK_ORDER_CANCELLED
+            });
+            break;
+          }
+
+        case _constants.EVENTS.TRANSAK_ORDER_FAILED:
+          {
+            eventEmitter.emit(_constants.EVENTS.TRANSAK_ORDER_FAILED, {
+              status: event.data.data,
+              eventName: _constants.EVENTS.TRANSAK_ORDER_FAILED
             });
             break;
           }
