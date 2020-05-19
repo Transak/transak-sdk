@@ -827,9 +827,12 @@ TransakSDK.prototype.init = function () {
 
 TransakSDK.prototype.close = async function () {
   let modal = document.getElementById("transakFiatOnOffRamp");
-  modal.style.display = "none";
-  modal.innerHTML = "";
-  await modal.remove();
+
+  if (modal && modal.style) {
+    modal.style.display = "none";
+    modal.innerHTML = "";
+    await modal.remove();
+  }
 };
 
 TransakSDK.prototype.closeRequest = function () {
@@ -862,7 +865,7 @@ TransakSDK.prototype.modal = async function () {
 
       document.documentElement.style.overflow = 'hidden';
       document.body.scroll = "no";
-      modal.style.display = "block";
+      if (modal && modal.style) modal.style.display = "block";
       this.isInitialised = true;
       eventEmitter.emit(_constants.EVENTS.TRANSAK_WIDGET_INITIALISED, {
         status: true,
@@ -919,7 +922,7 @@ async function generateURL(configData) {
         if (configData.exchangeScreenTitle) partnerData.exchangeScreenTitle = configData.exchangeScreenTitle;
         if (configData.hideMenu) partnerData.hideMenu = configData.hideMenu;
         if (configData.redirectURL) partnerData.redirectURL = configData.redirectURL;
-        if (configData.hostURL) partnerData.hostURL = configData.hostURL;
+        if (configData.hostURL) partnerData.hostURL = configData.hostURL ? configData.hostURL : window.location.origin;
         if (configData.disableWalletAddressForm) partnerData.disableWalletAddressForm = configData.disableWalletAddressForm;
         if (configData.cryptoCurrencyList) partnerData.cryptoCurrencyList = configData.cryptoCurrencyList.split(',');
         queryString = (0, _generalUtil.UrlEncode)(partnerData); // }
@@ -964,9 +967,13 @@ function handleMessage(event) {
             document.documentElement.style.overflow = 'scroll';
             document.body.scroll = "yes";
             let modal = document.getElementById("transakFiatOnOffRamp");
-            modal.style.display = "none";
-            modal.innerHTML = "";
-            modal.remove();
+
+            if (modal && modal.style) {
+              modal.style.display = "none";
+              modal.innerHTML = "";
+              modal.remove();
+            }
+
             break;
           }
 

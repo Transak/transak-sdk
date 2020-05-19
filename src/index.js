@@ -28,9 +28,11 @@ TransakSDK.prototype.init = function () {
 }
 TransakSDK.prototype.close = async function () {
     let modal = document.getElementById("transakFiatOnOffRamp");
-    modal.style.display = "none";
-    modal.innerHTML = "";
-    await modal.remove();
+    if (modal && modal.style) {
+        modal.style.display = "none";
+        modal.innerHTML = "";
+        await modal.remove();
+    }
 }
 TransakSDK.prototype.closeRequest = function () {
     let iframeEl = document.getElementById('transakOnOffRampWidget');
@@ -58,7 +60,7 @@ TransakSDK.prototype.modal = async function () {
             document.documentElement.style.overflow = 'hidden';
             document.body.scroll = "no";
 
-            modal.style.display = "block";
+            if (modal && modal.style) modal.style.display = "block";
             this.isInitialised = true;
             eventEmitter.emit(EVENTS.TRANSAK_WIDGET_INITIALISED, {
                 status: true,
@@ -108,7 +110,7 @@ async function generateURL(configData) {
                 if (configData.exchangeScreenTitle) partnerData.exchangeScreenTitle = configData.exchangeScreenTitle;
                 if (configData.hideMenu) partnerData.hideMenu = configData.hideMenu;
                 if (configData.redirectURL) partnerData.redirectURL = configData.redirectURL;
-                if (configData.hostURL) partnerData.hostURL = configData.hostURL;
+                if (configData.hostURL) partnerData.hostURL = (configData.hostURL ? configData.hostURL : window.location.origin);
                 if (configData.disableWalletAddressForm) partnerData.disableWalletAddressForm = configData.disableWalletAddressForm;
                 if (configData.cryptoCurrencyList) partnerData.cryptoCurrencyList = configData.cryptoCurrencyList.split(',');
                 queryString = UrlEncode(partnerData);
@@ -116,7 +118,8 @@ async function generateURL(configData) {
             } catch (e) {
                 throw(e)
             }
-        } else throw(errorsLang.ENTER_API_KEY);
+        }
+        else throw(errorsLang.ENTER_API_KEY);
         if (configData.widgetWidth) width = configData.widgetWidth;
         if (configData.widgetHeight) height = configData.widgetHeight;
     }
@@ -147,11 +150,12 @@ function handleMessage(event) {
                     //enable background scrolling when overlay appears
                     document.documentElement.style.overflow = 'scroll';
                     document.body.scroll = "yes";
-
                     let modal = document.getElementById("transakFiatOnOffRamp");
-                    modal.style.display = "none";
-                    modal.innerHTML = "";
-                    modal.remove();
+                    if (modal && modal.style) {
+                        modal.style.display = "none";
+                        modal.innerHTML = "";
+                        modal.remove();
+                    }
                     break;
                 }
                 case EVENTS.TRANSAK_ORDER_CREATED: {
