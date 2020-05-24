@@ -3,6 +3,7 @@ import {config, errorsLang, EVENTS} from "./constants";
 import {UrlEncode} from "./utils/generalUtil";
 import {closeSVGIcon} from './assets/svg';
 import {getCSS} from './assets/css';
+import queryStringLib from 'query-string'
 
 const eventEmitter = new events.EventEmitter();
 
@@ -102,8 +103,8 @@ async function generateURL(configData) {
                 if (configData.fiatAmount) partnerData.fiatAmount = configData.fiatAmount;
                 if (configData.walletAddressesData && (configData.walletAddressesData.networks || configData.walletAddressesData.coins)) {
                     partnerData.walletAddressesData = {}
-                    if (configData.walletAddressesData.networks) partnerData.walletAddressesData.networks = JSON.stringify(configData.walletAddressesData.networks);
-                    if (configData.walletAddressesData.coins) partnerData.walletAddressesData.coins = JSON.stringify(configData.walletAddressesData.coins);
+                    if (configData.walletAddressesData.networks) partnerData.walletAddressesData.networks = configData.walletAddressesData.networks;
+                    if (configData.walletAddressesData.coins) partnerData.walletAddressesData.coins = configData.walletAddressesData.coins;
                     partnerData.walletAddressesData = JSON.stringify(partnerData.walletAddressesData)
                 }
                 if (configData.fiatCurrency) partnerData.fiatCurrency = configData.fiatCurrency;
@@ -119,7 +120,7 @@ async function generateURL(configData) {
                 if (configData.hostURL) partnerData.hostURL = (configData.hostURL ? configData.hostURL : window.location.origin);
                 if (configData.disableWalletAddressForm) partnerData.disableWalletAddressForm = configData.disableWalletAddressForm;
                 if (configData.cryptoCurrencyList) partnerData.cryptoCurrencyList = configData.cryptoCurrencyList.split(',');
-                queryString = UrlEncode(partnerData);
+                queryString = queryStringLib.stringify(partnerData);
                 // }
             } catch (e) {
                 throw(e)

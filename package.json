@@ -1,6 +1,6 @@
 {
   "name": "@transak/transak-sdk",
-  "version": "1.0.16",
+  "version": "1.0.17",
   "description": "Transak SDK that allows you to easily integrate the fiat on/ramp",
   "main": "dist/sdk.js",
   "scripts": {
@@ -22,6 +22,7 @@
   "license": "ISC",
   "dependencies": {
     "events": "^3.1.0",
+    "query-string": "^6.12.1",
     "request": "^2.88.2"
   },
   "devDependencies": {
