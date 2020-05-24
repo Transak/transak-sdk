@@ -15,15 +15,14 @@ $ npm install @transak/transak-sdk
 import transakSDK from '@transak/transak-sdk'
 
 let transak = new transakSDK({
-    apiKey: '4fcd6904-706b-4aff-bd9d-77422813bbb7',  // Your API Key
-    environment: 'STAGING', // STAGING/PRODUCTION
+    apiKey: '4fcd6904-706b-4aff-bd9d-77422813bbb7',  // Your API Key (Required)
+    environment: 'STAGING', // STAGING/PRODUCTION (Required)
     defaultCryptoCurrency: 'ETH',
     walletAddress: '', // Your customer wallet address
     themeColor: '000000', // App theme color in hex
-    fiatCurrency: '', // INR/GBP
-    email: '', // Your customer email address
+    email: '', // Your customer email address (Optional)
     redirectURL: '',
-    hostURL: window.location.origin,
+    hostURL: window.location.origin, // Required field
     widgetHeight: '550px',
     widgetWidth: '450px'
 });
@@ -33,6 +32,11 @@ transak.init();
 // To get all the events
 transak.on(transak.ALL_EVENTS, (data) => {
 		console.log(data)
+});
+
+// This will trigger when the user closed the widget
+transak.on(transak.EVENTS.TRANSAK_WIDGET_CLOSE, (orderData) => {
+    transak.close();
 });
 
 // This will trigger when the user marks payment is made.

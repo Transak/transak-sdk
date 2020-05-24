@@ -100,6 +100,12 @@ async function generateURL(configData) {
                 if (configData.themeColor) partnerData.themeColor = configData.themeColor.replace("#", "");
                 if (configData.walletAddress) partnerData.walletAddress = configData.walletAddress;
                 if (configData.fiatAmount) partnerData.fiatAmount = configData.fiatAmount;
+                if (configData.walletAddressesData && (configData.walletAddressesData.networks || configData.walletAddressesData.coins)) {
+                    partnerData.walletAddressesData = {}
+                    if (configData.walletAddressesData.networks) partnerData.walletAddressesData.networks = JSON.stringify(configData.walletAddressesData.networks);
+                    if (configData.walletAddressesData.coins) partnerData.walletAddressesData.coins = JSON.stringify(configData.walletAddressesData.coins);
+                    partnerData.walletAddressesData = JSON.stringify(partnerData.walletAddressesData)
+                }
                 if (configData.fiatCurrency) partnerData.fiatCurrency = configData.fiatCurrency;
                 if (configData.countryCode) partnerData.countryCode = configData.countryCode;
                 if (configData.paymentMethod) partnerData.paymentMethod = configData.paymentMethod;
