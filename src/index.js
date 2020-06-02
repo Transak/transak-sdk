@@ -111,11 +111,15 @@ async function generateURL(configData) {
                 if (configData.countryCode) partnerData.countryCode = configData.countryCode;
                 if (configData.paymentMethod) partnerData.paymentMethod = configData.paymentMethod;
                 if (configData.defaultPaymentMethod) partnerData.defaultPaymentMethod = configData.defaultPaymentMethod;
+                if (configData.disablePaymentMethods) partnerData.disablePaymentMethods = configData.disablePaymentMethods;
                 if (configData.email) partnerData.email = configData.email;
+                if (configData.userData) partnerData.userData = JSON.stringify(configData.userData)
                 if (configData.partnerOrderId) partnerData.partnerOrderId = configData.partnerOrderId;
                 if (configData.partnerCustomerId) partnerData.partnerCustomerId = configData.partnerCustomerId;
                 if (configData.exchangeScreenTitle) partnerData.exchangeScreenTitle = configData.exchangeScreenTitle;
                 if (configData.hideMenu) partnerData.hideMenu = configData.hideMenu;
+                if (configData.hideExchangeScreen) partnerData.hideExchangeScreen = configData.hideExchangeScreen;
+                if (configData.isDisableCrypto) partnerData.isDisableCrypto = configData.isDisableCrypto;
                 if (configData.redirectURL) partnerData.redirectURL = configData.redirectURL;
                 if (configData.hostURL) partnerData.hostURL = (configData.hostURL ? configData.hostURL : window.location.origin);
                 if (configData.disableWalletAddressForm) partnerData.disableWalletAddressForm = configData.disableWalletAddressForm;

@@ -10,6 +10,9 @@ $ yarn add @transak/transak-sdk
 # Using npm
 $ npm install @transak/transak-sdk
 ```
+
+For the advance customization, view our [query parameter documentation.](https://integrate.transak.com/Query-Parameters-9ec523df3b874ec58cef4fa3a906f238)
+
 ### Example usage
 ```sh
 import transakSDK from '@transak/transak-sdk'
@@ -46,4 +49,4 @@ transak.on(transak.EVENTS.TRANSAK_ORDER_SUCCESSFUL, (orderData) => {
 });
 ```
 
-For in-depth instructions on integrating Transak, view [our complete documentation.](https://transak.com/integrate)
+For in-depth instructions on integrating Transak, view [our complete documentation.](https://integrate.transak.com)
