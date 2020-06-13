@@ -118,6 +118,7 @@ async function generateURL(configData) {
                 if (configData.partnerCustomerId) partnerData.partnerCustomerId = configData.partnerCustomerId;
                 if (configData.exchangeScreenTitle) partnerData.exchangeScreenTitle = configData.exchangeScreenTitle;
                 if (configData.hideMenu) partnerData.hideMenu = configData.hideMenu;
+                if (configData.accessToken) partnerData.accessToken = configData.accessToken;
                 if (configData.hideExchangeScreen) partnerData.hideExchangeScreen = configData.hideExchangeScreen;
                 if (configData.isDisableCrypto) partnerData.isDisableCrypto = configData.isDisableCrypto;
                 if (configData.redirectURL) partnerData.redirectURL = configData.redirectURL;
@@ -125,7 +126,6 @@ async function generateURL(configData) {
                 if (configData.disableWalletAddressForm) partnerData.disableWalletAddressForm = configData.disableWalletAddressForm;
                 if (configData.cryptoCurrencyList) partnerData.cryptoCurrencyList = configData.cryptoCurrencyList.split(',');
                 queryString = queryStringLib.stringify(partnerData, {arrayFormat: 'comma'});
-                // }
             } catch (e) {
                 throw(e)
             }
