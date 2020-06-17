@@ -1411,6 +1411,7 @@ async function generateURL(configData) {
         if (configData.countryCode) partnerData.countryCode = configData.countryCode;
         if (configData.paymentMethod) partnerData.paymentMethod = configData.paymentMethod;
         if (configData.defaultPaymentMethod) partnerData.defaultPaymentMethod = configData.defaultPaymentMethod;
+        if (configData.isAutoFillUserData) partnerData.isAutoFillUserData = configData.isAutoFillUserData;
         if (configData.disablePaymentMethods) partnerData.disablePaymentMethods = configData.disablePaymentMethods;
         if (configData.email) partnerData.email = configData.email;
         if (configData.userData) partnerData.userData = JSON.stringify(configData.userData);
