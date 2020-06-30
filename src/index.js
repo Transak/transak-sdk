@@ -112,6 +112,7 @@ async function generateURL(configData) {
                 if (configData.paymentMethod) partnerData.paymentMethod = configData.paymentMethod;
                 if (configData.defaultPaymentMethod) partnerData.defaultPaymentMethod = configData.defaultPaymentMethod;
                 if (configData.isAutoFillUserData) partnerData.isAutoFillUserData = configData.isAutoFillUserData;
+                if (configData.isFeeCalculationHidden) partnerData.isFeeCalculationHidden = configData.isFeeCalculationHidden;
                 if (configData.disablePaymentMethods) partnerData.disablePaymentMethods = configData.disablePaymentMethods;
                 if (configData.email) partnerData.email = configData.email;
                 if (configData.userData) partnerData.userData = JSON.stringify(configData.userData)
