@@ -127,6 +127,7 @@ async function generateURL(configData) {
                 if (configData.hostURL) partnerData.hostURL = (configData.hostURL ? configData.hostURL : window.location.origin);
                 if (configData.disableWalletAddressForm) partnerData.disableWalletAddressForm = configData.disableWalletAddressForm;
                 if (configData.cryptoCurrencyList) partnerData.cryptoCurrencyList = configData.cryptoCurrencyList.split(',');
+                if (configData.networks) partnerData.networks = configData.networks.split(',');
                 queryString = queryStringLib.stringify(partnerData, {arrayFormat: 'comma'});
             } catch (e) {
                 throw(e)
