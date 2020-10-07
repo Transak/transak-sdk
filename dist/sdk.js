@@ -1214,9 +1214,14 @@ var _default = {
       BACKEND: 'https://staging-api.transak.com/api/v1',
       NAME: 'STAGING'
     },
-    DEVELOPMENT: {
+    LOCAL_DEVELOPMENT: {
       FRONTEND: 'http://localhost:3000',
-      BACKEND: 'http://localhost:8292/api/v1',
+      BACKEND: 'http://localhost:8292/api/v2',
+      NAME: 'LOCAL_DEVELOPMENT'
+    },
+    DEVELOPMENT: {
+      FRONTEND: 'https://development-global.transak.com',
+      BACKEND: 'https://development-api.transak.com/api/v2',
       NAME: 'DEVELOPMENT'
     },
     PRODUCTION: {
@@ -1458,7 +1463,7 @@ async function setStyle(themeColor, width, height) {
 
 function handleMessage(event) {
   let environment;
-  if (event.origin === _constants.config.ENVIRONMENT.DEVELOPMENT.FRONTEND) environment = _constants.config.ENVIRONMENT.DEVELOPMENT.NAME;else if (event.origin === _constants.config.ENVIRONMENT.PRODUCTION.FRONTEND) environment = _constants.config.ENVIRONMENT.PRODUCTION.NAME;else if (event.origin === _constants.config.ENVIRONMENT.STAGING.FRONTEND) environment = _constants.config.ENVIRONMENT.STAGING.NAME;
+  if (event.origin === _constants.config.ENVIRONMENT.LOCAL_DEVELOPMENT.FRONTEND) environment = _constants.config.ENVIRONMENT.LOCAL_DEVELOPMENT.NAME;else if (event.origin === _constants.config.ENVIRONMENT.PRODUCTION.FRONTEND) environment = _constants.config.ENVIRONMENT.PRODUCTION.NAME;else if (event.origin === _constants.config.ENVIRONMENT.STAGING.FRONTEND) environment = _constants.config.ENVIRONMENT.STAGING.NAME;else if (event.origin === _constants.config.ENVIRONMENT.DEVELOPMENT.FRONTEND) environment = _constants.config.ENVIRONMENT.DEVELOPMENT.NAME;
 
   if (environment) {
     if (event && event.data && event.data.event_id) {
