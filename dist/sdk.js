@@ -1434,6 +1434,7 @@ async function generateURL(configData) {
         if (configData.disableWalletAddressForm) partnerData.disableWalletAddressForm = configData.disableWalletAddressForm;
         if (configData.cryptoCurrencyList) partnerData.cryptoCurrencyList = configData.cryptoCurrencyList.split(',');
         if (configData.networks) partnerData.networks = configData.networks.split(',');
+        if (configData.defaultNetwork) partnerData.defaultNetwork = configData.defaultNetwork;
         queryString = _queryString.default.stringify(partnerData, {
           arrayFormat: 'comma'
         });
