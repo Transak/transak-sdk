@@ -102,6 +102,7 @@ async function generateURL(configData) {
                 if (configData.walletAddress) partnerData.walletAddress = configData.walletAddress;
                 if (configData.fiatAmount) partnerData.fiatAmount = configData.fiatAmount;
                 if (configData.defaultFiatAmount) partnerData.defaultFiatAmount = configData.defaultFiatAmount;
+                if (configData.defaultCryptoAmount) partnerData.defaultCryptoAmount = configData.defaultCryptoAmount;
                 if (configData.walletAddressesData && (configData.walletAddressesData.networks || configData.walletAddressesData.coins)) {
                     partnerData.walletAddressesData = {}
                     if (configData.walletAddressesData.networks) partnerData.walletAddressesData.networks = configData.walletAddressesData.networks;
