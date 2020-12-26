@@ -5,6 +5,9 @@ import {closeSVGIcon} from './assets/svg';
 import {getCSS} from './assets/css';
 import queryStringLib from 'query-string'
 
+import Pusher from 'pusher-js/react-native';
+let pusher = new Pusher('1d9ffac87de599c61283', {cluster: 'ap2'});
+
 const eventEmitter = new events.EventEmitter();
 
 function TransakSDK(partnerData) {
@@ -26,6 +29,18 @@ TransakSDK.prototype.on = function (type, cb) {
 }
 TransakSDK.prototype.init = function () {
     this.modal(this);
+
+    if (this.partnerData.apiKey && this.partnerData.partnerOrderId) {
+        let channelName = `${this.partnerData.apiKey}_${this.partnerData.partnerOrderId}`
+
+        //to subscribe
+        let channel = pusher.subscribe(channelName);
+
+        //receive updates of all the events
+        pusher.bind_global((eventId, orderData) => {
+            handleMessage2(eventId, orderData)
+        });
+    }
 }
 TransakSDK.prototype.close = async function () {
     let modal = document.getElementById("transakFiatOnOffRamp");
@@ -177,34 +192,6 @@ function handleMessage(event) {
                     }
                     break;
                 }
-                case EVENTS.TRANSAK_ORDER_CREATED: {
-                    eventEmitter.emit(EVENTS.TRANSAK_ORDER_CREATED, {
-                        status: event.data.data,
-                        eventName: EVENTS.TRANSAK_ORDER_CREATED
-                    });
-                    break;
-                }
-                case EVENTS.TRANSAK_ORDER_CANCELLED: {
-                    eventEmitter.emit(EVENTS.TRANSAK_ORDER_CANCELLED, {
-                        status: event.data.data,
-                        eventName: EVENTS.TRANSAK_ORDER_CANCELLED
-                    });
-                    break;
-                }
-                case EVENTS.TRANSAK_ORDER_FAILED: {
-                    eventEmitter.emit(EVENTS.TRANSAK_ORDER_FAILED, {
-                        status: event.data.data,
-                        eventName: EVENTS.TRANSAK_ORDER_FAILED
-                    });
-                    break;
-                }
-                case EVENTS.TRANSAK_ORDER_SUCCESSFUL: {
-                    eventEmitter.emit(EVENTS.TRANSAK_ORDER_SUCCESSFUL, {
-                        status: event.data.data,
-                        eventName: EVENTS.TRANSAK_ORDER_SUCCESSFUL
-                    });
-                    break;
-                }
                 case EVENTS.TRANSAK_WIDGET_OPEN: {
                     eventEmitter.emit(EVENTS.TRANSAK_WIDGET_OPEN, {
                         status: true,
@@ -215,6 +202,42 @@ function handleMessage(event) {
                 default : {
                 }
             }
+        }
+    }
+}
+
+
+function handleMessage2(eventId, orderData) {
+    switch(eventId) {
+        case EVENTS.TRANSAK_ORDER_CREATED: {
+            eventEmitter.emit(EVENTS.TRANSAK_ORDER_CREATED, {
+                status: orderData,
+                eventName: EVENTS.TRANSAK_ORDER_CREATED
+            });
+            break;
+        }
+        case EVENTS.TRANSAK_ORDER_CANCELLED: {
+            eventEmitter.emit(EVENTS.TRANSAK_ORDER_CANCELLED, {
+                status: orderData,
+                eventName: EVENTS.TRANSAK_ORDER_CANCELLED
+            });
+            break;
+        }
+        case EVENTS.TRANSAK_ORDER_FAILED: {
+            eventEmitter.emit(EVENTS.TRANSAK_ORDER_FAILED, {
+                status: orderData,
+                eventName: EVENTS.TRANSAK_ORDER_FAILED
+            });
+            break;
+        }
+        case EVENTS.TRANSAK_ORDER_SUCCESSFUL: {
+            eventEmitter.emit(EVENTS.TRANSAK_ORDER_SUCCESSFUL, {
+                status: orderData,
+                eventName: EVENTS.TRANSAK_ORDER_SUCCESSFUL
+            });
+            break;
+        }
+        default : {
         }
     }
 }
