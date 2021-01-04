@@ -744,8 +744,10 @@ function parserForArrayFormat(options) {
 		case 'comma':
 		case 'separator':
 			return (key, value, accumulator) => {
-				const isArray = typeof value === 'string' && value.split('').indexOf(options.arrayFormatSeparator) > -1;
-				const newValue = isArray ? value.split(options.arrayFormatSeparator).map(item => decode(item, options)) : value === null ? value : decode(value, options);
+				const isArray = typeof value === 'string' && value.includes(options.arrayFormatSeparator);
+				const isEncodedArray = (typeof value === 'string' && !isArray && decode(value, options).includes(options.arrayFormatSeparator));
+				value = isEncodedArray ? decode(value, options) : value;
+				const newValue = isArray || isEncodedArray ? value.split(options.arrayFormatSeparator).map(item => decode(item, options)) : value === null ? value : decode(value, options);
 				accumulator[key] = newValue;
 			};
 
@@ -836,7 +838,7 @@ function parseValue(value, options) {
 	return value;
 }
 
-function parse(input, options) {
+function parse(query, options) {
 	options = Object.assign({
 		decode: true,
 		sort: true,
@@ -853,17 +855,17 @@ function parse(input, options) {
 	// Create an object with no prototype
 	const ret = Object.create(null);
 
-	if (typeof input !== 'string') {
+	if (typeof query !== 'string') {
 		return ret;
 	}
 
-	input = input.trim().replace(/^[?#&]/, '');
+	query = query.trim().replace(/^[?#&]/, '');
 
-	if (!input) {
+	if (!query) {
 		return ret;
 	}
 
-	for (const param of input.split('&')) {
+	for (const param of query.split('&')) {
 		let [key, value] = splitOnFirst(options.decode ? param.replace(/\+/g, ' ') : param, '=');
 
 		// Missing `=` should be `null`:
@@ -959,22 +961,41 @@ exports.stringify = (object, options) => {
 	}).filter(x => x.length > 0).join('&');
 };
 
-exports.parseUrl = (input, options) => {
-	return {
-		url: removeHash(input).split('?')[0] || '',
-		query: parse(extract(input), options)
-	};
+exports.parseUrl = (url, options) => {
+	options = Object.assign({
+		decode: true
+	}, options);
+
+	const [url_, hash] = splitOnFirst(url, '#');
+
+	return Object.assign(
+		{
+			url: url_.split('?')[0] || '',
+			query: parse(extract(url), options)
+		},
+		options && options.parseFragmentIdentifier && hash ? {fragmentIdentifier: decode(hash, options)} : {}
+	);
 };
 
-exports.stringifyUrl = (input, options) => {
-	const url = removeHash(input.url).split('?')[0] || '';
-	const queryFromUrl = exports.extract(input.url);
-	const parsedQueryFromUrl = exports.parse(queryFromUrl);
-	const hash = getHash(input.url);
-	const query = Object.assign(parsedQueryFromUrl, input.query);
+exports.stringifyUrl = (object, options) => {
+	options = Object.assign({
+		encode: true,
+		strict: true
+	}, options);
+
+	const url = removeHash(object.url).split('?')[0] || '';
+	const queryFromUrl = exports.extract(object.url);
+	const parsedQueryFromUrl = exports.parse(queryFromUrl, {sort: false});
+
+	const query = Object.assign(parsedQueryFromUrl, object.query);
 	let queryString = exports.stringify(query, options);
 	if (queryString) {
 		queryString = `?${queryString}`;
+	}
+
+	let hash = getHash(object.url);
+	if (object.fragmentIdentifier) {
+		hash = `#${encode(object.fragmentIdentifier, options)}`;
 	}
 
 	return `${url}${queryString}${hash}`;
@@ -1177,7 +1198,10 @@ exports.default = void 0;
 var _default = {
   SOMETHING_WRONG: `[Transak SDK] => Oops something went wrong please try again. Contact us at hello@transak.com`,
   ENTER_API_KEY: `[Transak SDK] => Please enter your API Key`,
-  NOT_INITIALIZED_PROPERLY: `[Transak SDK] => Transak SDK is not initialized properly`
+  NOT_INITIALIZED_PROPERLY: `[Transak SDK] => Transak SDK is not initialized properly`,
+  ENTER_CRYPTO_CURRENCY: `[Transak SDK] => cryptoCurrency field is required`,
+  ENTER_FIAT_CURRENCY: `[Transak SDK] => fiatCurrency field is required`,
+  ENTER_IS_BUY_OR_SELL: `[Transak SDK] => isBuyOrSell field is required`
 };
 exports.default = _default;
 
@@ -1542,6 +1566,33 @@ function handleMessage(event) {
   }
 }
 
+TransakSDK.prototype.getPrice = function (configData) {
+  let params = {},
+      environment = _constants.config.ENVIRONMENT.DEVELOPMENT;
+
+  try {
+    params.apiKey = this.partnerData.apiKey;
+    if (configData.environment && _constants.config.ENVIRONMENT[configData.environment]) environment = _constants.config.ENVIRONMENT[configData.environment].NAME;
+    environment = environment.toUpperCase(); // required params
+
+    if (!configData.cryptoCurrency) throw _constants.errorsLang.ENTER_CRYPTO_CURRENCY;
+    if (!configData.fiatCurrency) throw _constants.errorsLang.ENTER_FIAT_CURRENCY;
+    if (!configData.isBuyOrSell) throw _constants.errorsLang.ENTER_IS_BUY_OR_SELL;
+    params.cryptoCurrency = configData.cryptoCurrency;
+    params.fiatCurrency = configData.fiatCurrency;
+    params.isBuyOrSell = configData.isBuyOrSell; // optional params        
+
+    if (configData.cryptoAmount) params.cryptoAmount = configData.cryptoAmount;
+    if (configData.fiatAmount) params.fiatAmount = configData.fiatAmount;
+    if (configData.partnerApiKey) params.partnerApiKey = configData.partnerApiKey;
+    if (configData.paymentMethodId) params.paymentMethodId = configData.paymentMethodId;
+  } catch (e) {
+    throw e;
+  }
+
+  return (0, _generalUtil.Request)(_constants.config.ENVIRONMENT[environment].BACKEND, "/currencies/price", params);
+};
+
 var _default = TransakSDK;
 exports.default = _default;
 
@@ -1552,6 +1603,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.UrlEncode = UrlEncode;
+exports.Request = Request;
 exports.default = void 0;
 
 function UrlEncode(data, encodeornot) {
@@ -1570,7 +1622,42 @@ function UrlEncode(data, encodeornot) {
 }
 
 ;
+
+let serialize = function (obj) {
+  var str = [];
+
+  for (var p in obj) if (obj.hasOwnProperty(p)) {
+    str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+  }
+
+  return str.join("&");
+};
+
+async function Request(host, uri, params, method = 'GET') {
+  const options = {
+    method,
+    headers: {
+      'Content-Type': 'application/json' // we will be sending JSON
+
+    }
+  }; // if params exists and method is GET, add query string to uri
+  // otherwise, just add params as a "body" property to the options object
+
+  if (params) {
+    if (method === 'GET') {
+      uri += '?' + serialize(params);
+    } else {
+      options.body = JSON.stringify(params); // body should match Content-Type in headers option
+    }
+  }
+
+  const response = await fetch(host + uri, options);
+  const result = await response.json();
+  return result;
+}
+
 var _default = {
+  Request,
   UrlEncode
 };
 exports.default = _default;
