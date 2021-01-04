@@ -1235,7 +1235,7 @@ var _default = {
   ENVIRONMENT: {
     STAGING: {
       FRONTEND: 'https://staging-global.transak.com',
-      BACKEND: 'https://staging-api.transak.com/api/v1',
+      BACKEND: 'https://staging-api.transak.com/api/v2',
       NAME: 'STAGING'
     },
     LOCAL_DEVELOPMENT: {
