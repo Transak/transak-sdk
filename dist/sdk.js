@@ -1201,7 +1201,8 @@ var _default = {
   NOT_INITIALIZED_PROPERLY: `[Transak SDK] => Transak SDK is not initialized properly`,
   ENTER_CRYPTO_CURRENCY: `[Transak SDK] => cryptoCurrency field is required`,
   ENTER_FIAT_CURRENCY: `[Transak SDK] => fiatCurrency field is required`,
-  ENTER_IS_BUY_OR_SELL: `[Transak SDK] => isBuyOrSell field is required`
+  ENTER_IS_BUY_OR_SELL: `[Transak SDK] => isBuyOrSell field is required`,
+  NON_200_STATUS_RETURNED: `[Transak SDK] => Non-200 status code was returned`
 };
 exports.default = _default;
 
@@ -1566,12 +1567,14 @@ function handleMessage(event) {
   }
 }
 
-TransakSDK.prototype.getPrice = function (configData) {
+TransakSDK.prototype.getPrice = async function (configData) {
   let params = {},
-      environment = _constants.config.ENVIRONMENT.DEVELOPMENT;
+      environment = _constants.config.ENVIRONMENT.DEVELOPMENT.NAME.toUpperCase(),
+      response,
+      result;
 
   try {
-    if (this.partnerData) {
+    if (this.partnerData && configData) {
       params.apiKey = this.partnerData.apiKey;
       if (configData.environment && _constants.config.ENVIRONMENT[configData.environment]) environment = _constants.config.ENVIRONMENT[configData.environment].NAME;
       environment = environment.toUpperCase(); // required params
@@ -1592,7 +1595,9 @@ TransakSDK.prototype.getPrice = function (configData) {
     throw e;
   }
 
-  return (0, _generalUtil.Request)(_constants.config.ENVIRONMENT[environment].BACKEND, "/currencies/price", params);
+  response = await (0, _generalUtil.Request)(_constants.config.ENVIRONMENT[environment].BACKEND, "/currencies/price", params);
+  if (response.status == 200) result = await response.json();else throw _constants.errorsLang.NON_200_STATUS_RETURNED + ": " + response.status;
+  return result['response'];
 };
 
 var _default = TransakSDK;
@@ -1654,8 +1659,7 @@ async function Request(host, uri, params, method = 'GET') {
   }
 
   const response = await fetch(host + uri, options);
-  const result = await response.json();
-  return result;
+  return response;
 }
 
 var _default = {

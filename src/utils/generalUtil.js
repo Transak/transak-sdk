@@ -21,14 +21,12 @@ let serialize = function(obj) {
 }
 
 export async function Request(host, uri, params, method = 'GET') {
-
   const options = {
     method,
     headers: {
       'Content-Type': 'application/json' // we will be sending JSON
     }
   };
-
   // if params exists and method is GET, add query string to uri
   // otherwise, just add params as a "body" property to the options object
   if (params) {
@@ -38,12 +36,8 @@ export async function Request(host, uri, params, method = 'GET') {
       options.body = JSON.stringify(params); // body should match Content-Type in headers option
     }
   }
-
   const response = await fetch(host + uri, options);
-  const result = await response.json();
-
-  return result;
-
+  return response;
 }
 
 export default {Request, UrlEncode}

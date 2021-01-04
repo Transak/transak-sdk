@@ -6,4 +6,5 @@ export default {
     ENTER_CRYPTO_CURRENCY: `[Transak SDK] => cryptoCurrency field is required`,
     ENTER_FIAT_CURRENCY: `[Transak SDK] => fiatCurrency field is required`,
     ENTER_IS_BUY_OR_SELL: `[Transak SDK] => isBuyOrSell field is required`,
+    NON_200_STATUS_RETURNED: `[Transak SDK] => Non-200 status code was returned`,
 }

@@ -220,10 +220,10 @@ function handleMessage(event) {
     }
 }
 
-TransakSDK.prototype.getPrice = function (configData) {
-    let params = {}, environment = config.ENVIRONMENT.DEVELOPMENT;
+TransakSDK.prototype.getPrice = async function (configData) {
+    let params = {}, environment = config.ENVIRONMENT.DEVELOPMENT.NAME.toUpperCase(), response, result;
     try {
-        if (this.partnerData) {
+        if (this.partnerData && configData) {
             params.apiKey = this.partnerData.apiKey;
             if (configData.environment && config.ENVIRONMENT[configData.environment]) 
                 environment = config.ENVIRONMENT[configData.environment].NAME;
@@ -246,8 +246,13 @@ TransakSDK.prototype.getPrice = function (configData) {
     } catch (e) {
         throw(e);
     }
-        
-    return Request(config.ENVIRONMENT[environment].BACKEND, "/currencies/price", params)
+
+    response = await Request(config.ENVIRONMENT[environment].BACKEND, "/currencies/price", params)
+    if (response.status == 200)
+        result = await response.json()
+    else
+        throw(errorsLang.NON_200_STATUS_RETURNED + ": " + response.status);
+    return result['response']
 }
 
 export default TransakSDK
