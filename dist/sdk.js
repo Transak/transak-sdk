@@ -1571,21 +1571,23 @@ TransakSDK.prototype.getPrice = function (configData) {
       environment = _constants.config.ENVIRONMENT.DEVELOPMENT;
 
   try {
-    params.apiKey = this.partnerData.apiKey;
-    if (configData.environment && _constants.config.ENVIRONMENT[configData.environment]) environment = _constants.config.ENVIRONMENT[configData.environment].NAME;
-    environment = environment.toUpperCase(); // required params
+    if (this.partnerData) {
+      params.apiKey = this.partnerData.apiKey;
+      if (configData.environment && _constants.config.ENVIRONMENT[configData.environment]) environment = _constants.config.ENVIRONMENT[configData.environment].NAME;
+      environment = environment.toUpperCase(); // required params
 
-    if (!configData.cryptoCurrency) throw _constants.errorsLang.ENTER_CRYPTO_CURRENCY;
-    if (!configData.fiatCurrency) throw _constants.errorsLang.ENTER_FIAT_CURRENCY;
-    if (!configData.isBuyOrSell) throw _constants.errorsLang.ENTER_IS_BUY_OR_SELL;
-    params.cryptoCurrency = configData.cryptoCurrency;
-    params.fiatCurrency = configData.fiatCurrency;
-    params.isBuyOrSell = configData.isBuyOrSell; // optional params        
+      if (!configData.cryptoCurrency) throw _constants.errorsLang.ENTER_CRYPTO_CURRENCY;
+      if (!configData.fiatCurrency) throw _constants.errorsLang.ENTER_FIAT_CURRENCY;
+      if (!configData.isBuyOrSell) throw _constants.errorsLang.ENTER_IS_BUY_OR_SELL;
+      params.cryptoCurrency = configData.cryptoCurrency;
+      params.fiatCurrency = configData.fiatCurrency;
+      params.isBuyOrSell = configData.isBuyOrSell; // optional params        
 
-    if (configData.cryptoAmount) params.cryptoAmount = configData.cryptoAmount;
-    if (configData.fiatAmount) params.fiatAmount = configData.fiatAmount;
-    if (configData.partnerApiKey) params.partnerApiKey = configData.partnerApiKey;
-    if (configData.paymentMethodId) params.paymentMethodId = configData.paymentMethodId;
+      if (configData.cryptoAmount) params.cryptoAmount = configData.cryptoAmount;
+      if (configData.fiatAmount) params.fiatAmount = configData.fiatAmount;
+      if (configData.partnerApiKey) params.partnerApiKey = configData.partnerApiKey;
+      if (configData.paymentMethodId) params.paymentMethodId = configData.paymentMethodId;
+    }
   } catch (e) {
     throw e;
   }
