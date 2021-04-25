@@ -1226,7 +1226,7 @@ var _default = {
     },
     PRODUCTION: {
       FRONTEND: 'https://global.transak.com',
-      BACKEND: 'https://api.transak.com/api/v1',
+      BACKEND: 'https://api.transak.com/api/v2',
       NAME: 'PRODUCTION'
     }
   },
