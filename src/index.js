@@ -3,6 +3,7 @@ import {config, errorsLang, EVENTS} from "./constants";
 import {UrlEncode} from "./utils/generalUtil";
 import {closeSVGIcon} from './assets/svg';
 import {getCSS} from './assets/css';
+import {Request} from "./utils/generalUtil";
 import queryStringLib from 'query-string'
 
 const eventEmitter = new events.EventEmitter();
@@ -217,6 +218,41 @@ function handleMessage(event) {
             }
         }
     }
+}
+
+TransakSDK.prototype.getPrice = async function (configData) {
+    let params = {}, environment = config.ENVIRONMENT.DEVELOPMENT.NAME.toUpperCase(), response, result;
+    try {
+        if (this.partnerData && configData) {
+            params.apiKey = this.partnerData.apiKey;
+            if (configData.environment && config.ENVIRONMENT[configData.environment]) 
+                environment = config.ENVIRONMENT[configData.environment].NAME;
+            environment = environment.toUpperCase();
+
+            // required params
+            if (!configData.cryptoCurrency) throw(errorsLang.ENTER_CRYPTO_CURRENCY);
+            if (!configData.fiatCurrency) throw(errorsLang.ENTER_FIAT_CURRENCY);
+            if (!configData.isBuyOrSell) throw(errorsLang.ENTER_IS_BUY_OR_SELL);
+            params.cryptoCurrency = configData.cryptoCurrency;
+            params.fiatCurrency = configData.fiatCurrency;
+            params.isBuyOrSell = configData.isBuyOrSell;
+
+            // optional params        
+            if (configData.cryptoAmount) params.cryptoAmount = configData.cryptoAmount;
+            if (configData.fiatAmount) params.fiatAmount = configData.fiatAmount;
+            if (configData.partnerApiKey) params.partnerApiKey = configData.partnerApiKey;
+            if (configData.paymentMethodId) params.paymentMethodId = configData.paymentMethodId;
+        }
+    } catch (e) {
+        throw(e);
+    }
+
+    response = await Request(config.ENVIRONMENT[environment].BACKEND, "/currencies/price", params)
+    if (response.status == 200)
+        result = await response.json()
+    else
+        throw(errorsLang.NON_200_STATUS_RETURNED + ": " + response.status);
+    return result['response']
 }
 
 export default TransakSDK

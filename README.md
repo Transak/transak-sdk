@@ -49,4 +49,20 @@ transak.on(transak.EVENTS.TRANSAK_ORDER_SUCCESSFUL, (orderData) => {
 });
 ```
 
+### Pricing API
+Here's how you can use the [Transak Pricing API](https://transak.stoplight.io/docs/transak-docs/1.swagger.yaml/paths/~1currencies~1price/get) using the SDK.
+
+```
+const priceData = await transakSDK.getPrice({
+    cryptoCurrency: "ETH",
+    fiatCurrency: "INR",
+    isBuyOrSell: "BUY",
+    fiatAmount: 2000,
+    partnerApiKey: "4fcd6904-706b-4aff-bd9d-77422813bbb7",
+    environment: "STAGING",
+});
+
+console.log(priceData);
+```
+
 For in-depth instructions on integrating Transak, view [our complete documentation.](https://integrate.transak.com)
