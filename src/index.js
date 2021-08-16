@@ -48,7 +48,7 @@ TransakSDK.prototype.modal = async function () {
             let {url, width, height, partnerData} = await generateURL(this.partnerData);
             let wrapper = document.createElement('div');
             wrapper.id = "transakFiatOnOffRamp";
-            wrapper.innerHTML = `<div class="transak_modal-overlay" id="transak_modal-overlay"></div><div class="transak_modal" id="transak_modal"><div class="transak_modal-content"><span class="transak_close">${closeSVGIcon}</span><div class="transakContainer"><iframe id="transakOnOffRampWidget" src="${url}" style="width: ${width}; height: ${height}"></iframe></div></div></div>`;
+            wrapper.innerHTML = `<div class="transak_modal-overlay" id="transak_modal-overlay"></div><div class="transak_modal" id="transak_modal"><div class="transak_modal-content"><span class="transak_close">${closeSVGIcon}</span><div class="transakContainer"><iframe id="transakOnOffRampWidget" allow="camera;fullscreen;accelerometer;gyroscope;magnetometer" allowFullScreen src="${url}" style="width: ${width}; height: ${height}"></iframe></div></div></div>`;
             let container = document.getElementsByTagName("body");
             if (!container) container = document.getElementsByTagName("html");
             if (!container) container = document.getElementsByTagName("div");
