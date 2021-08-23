@@ -4,10 +4,12 @@ import {UrlEncode} from "./utils/generalUtil";
 import {closeSVGIcon} from './assets/svg';
 import {getCSS} from './assets/css';
 import queryStringLib from 'query-string'
+import { version } from "../package.json"
 
 const eventEmitter = new events.EventEmitter();
 
 function TransakSDK(partnerData) {
+    this.sdkVersion = version;
     this.partnerData = partnerData;
     this.isInitialised = false;
     this.EVENTS = EVENTS;
@@ -45,7 +47,7 @@ TransakSDK.prototype.closeRequest = function () {
 TransakSDK.prototype.modal = async function () {
     try {
         if (this.partnerData) {
-            let {url, width, height, partnerData} = await generateURL(this.partnerData);
+            let {url, width, height, partnerData} = await generateURL({ ...this.partnerData, sdkVersion: this.sdkVersion });
             let wrapper = document.createElement('div');
             wrapper.id = "transakFiatOnOffRamp";
             wrapper.innerHTML = `<div class="transak_modal-overlay" id="transak_modal-overlay"></div><div class="transak_modal" id="transak_modal"><div class="transak_modal-content"><span class="transak_close">${closeSVGIcon}</span><div class="transakContainer"><iframe id="transakOnOffRampWidget" allow="camera;fullscreen;accelerometer;gyroscope;magnetometer" allowFullScreen src="${url}" style="width: ${width}; height: ${height}"></iframe></div></div></div>`;
@@ -95,6 +97,7 @@ async function generateURL(configData) {
                 // let partnerDataBackend = await fetchAPIKey(configData.apiKey, config.ENVIRONMENT[environment].BACKEND);
                 // if (partnerDataBackend) {
                 partnerData.apiKey = configData.apiKey;
+                if (configData.sdkVersion) partnerData.sdkVersion = configData.sdkVersion;
                 if (configData.cryptoCurrencyCode) partnerData.cryptoCurrencyCode = configData.cryptoCurrencyCode;
                 if (configData.defaultCryptoCurrency) partnerData.defaultCryptoCurrency = configData.defaultCryptoCurrency;
                 if (configData.walletAddress) partnerData.walletAddress = configData.walletAddress;

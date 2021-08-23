@@ -621,9 +621,29 @@ module.exports = function (encodedURI) {
 
 },{}],3:[function(require,module,exports){
 'use strict';
+module.exports = function (obj, predicate) {
+	var ret = {};
+	var keys = Object.keys(obj);
+	var isArr = Array.isArray(predicate);
+
+	for (var i = 0; i < keys.length; i++) {
+		var key = keys[i];
+		var val = obj[key];
+
+		if (isArr ? predicate.indexOf(key) !== -1 : predicate(key, val, obj)) {
+			ret[key] = val;
+		}
+	}
+
+	return ret;
+};
+
+},{}],4:[function(require,module,exports){
+'use strict';
 const strictUriEncode = require('strict-uri-encode');
 const decodeComponent = require('decode-uri-component');
 const splitOnFirst = require('split-on-first');
+const filterObject = require('filter-obj');
 
 const isNullOrUndefined = value => value === null || value === undefined;
 
@@ -744,8 +764,10 @@ function parserForArrayFormat(options) {
 		case 'comma':
 		case 'separator':
 			return (key, value, accumulator) => {
-				const isArray = typeof value === 'string' && value.split('').indexOf(options.arrayFormatSeparator) > -1;
-				const newValue = isArray ? value.split(options.arrayFormatSeparator).map(item => decode(item, options)) : value === null ? value : decode(value, options);
+				const isArray = typeof value === 'string' && value.includes(options.arrayFormatSeparator);
+				const isEncodedArray = (typeof value === 'string' && !isArray && decode(value, options).includes(options.arrayFormatSeparator));
+				value = isEncodedArray ? decode(value, options) : value;
+				const newValue = isArray || isEncodedArray ? value.split(options.arrayFormatSeparator).map(item => decode(item, options)) : value === null ? value : decode(value, options);
 				accumulator[key] = newValue;
 			};
 
@@ -836,7 +858,7 @@ function parseValue(value, options) {
 	return value;
 }
 
-function parse(input, options) {
+function parse(query, options) {
 	options = Object.assign({
 		decode: true,
 		sort: true,
@@ -853,17 +875,21 @@ function parse(input, options) {
 	// Create an object with no prototype
 	const ret = Object.create(null);
 
-	if (typeof input !== 'string') {
+	if (typeof query !== 'string') {
 		return ret;
 	}
 
-	input = input.trim().replace(/^[?#&]/, '');
+	query = query.trim().replace(/^[?#&]/, '');
 
-	if (!input) {
+	if (!query) {
 		return ret;
 	}
 
-	for (const param of input.split('&')) {
+	for (const param of query.split('&')) {
+		if (param === '') {
+			continue;
+		}
+
 		let [key, value] = splitOnFirst(options.decode ? param.replace(/\+/g, ' ') : param, '=');
 
 		// Missing `=` should be `null`:
@@ -959,28 +985,66 @@ exports.stringify = (object, options) => {
 	}).filter(x => x.length > 0).join('&');
 };
 
-exports.parseUrl = (input, options) => {
-	return {
-		url: removeHash(input).split('?')[0] || '',
-		query: parse(extract(input), options)
-	};
+exports.parseUrl = (url, options) => {
+	options = Object.assign({
+		decode: true
+	}, options);
+
+	const [url_, hash] = splitOnFirst(url, '#');
+
+	return Object.assign(
+		{
+			url: url_.split('?')[0] || '',
+			query: parse(extract(url), options)
+		},
+		options && options.parseFragmentIdentifier && hash ? {fragmentIdentifier: decode(hash, options)} : {}
+	);
 };
 
-exports.stringifyUrl = (input, options) => {
-	const url = removeHash(input.url).split('?')[0] || '';
-	const queryFromUrl = exports.extract(input.url);
-	const parsedQueryFromUrl = exports.parse(queryFromUrl);
-	const hash = getHash(input.url);
-	const query = Object.assign(parsedQueryFromUrl, input.query);
+exports.stringifyUrl = (object, options) => {
+	options = Object.assign({
+		encode: true,
+		strict: true
+	}, options);
+
+	const url = removeHash(object.url).split('?')[0] || '';
+	const queryFromUrl = exports.extract(object.url);
+	const parsedQueryFromUrl = exports.parse(queryFromUrl, {sort: false});
+
+	const query = Object.assign(parsedQueryFromUrl, object.query);
 	let queryString = exports.stringify(query, options);
 	if (queryString) {
 		queryString = `?${queryString}`;
 	}
 
+	let hash = getHash(object.url);
+	if (object.fragmentIdentifier) {
+		hash = `#${encode(object.fragmentIdentifier, options)}`;
+	}
+
 	return `${url}${queryString}${hash}`;
 };
 
-},{"decode-uri-component":2,"split-on-first":4,"strict-uri-encode":5}],4:[function(require,module,exports){
+exports.pick = (input, filter, options) => {
+	options = Object.assign({
+		parseFragmentIdentifier: true
+	}, options);
+
+	const {url, query, fragmentIdentifier} = exports.parseUrl(input, options);
+	return exports.stringifyUrl({
+		url,
+		query: filterObject(query, filter),
+		fragmentIdentifier
+	}, options);
+};
+
+exports.exclude = (input, filter, options) => {
+	const exclusionFilter = Array.isArray(filter) ? key => !filter.includes(key) : (key, value) => !filter(key, value);
+
+	return exports.pick(input, exclusionFilter, options);
+};
+
+},{"decode-uri-component":2,"filter-obj":3,"split-on-first":5,"strict-uri-encode":6}],5:[function(require,module,exports){
 'use strict';
 
 module.exports = (string, separator) => {
@@ -1004,11 +1068,57 @@ module.exports = (string, separator) => {
 	];
 };
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 'use strict';
 module.exports = str => encodeURIComponent(str).replace(/[!'()*]/g, x => `%${x.charCodeAt(0).toString(16).toUpperCase()}`);
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
+module.exports={
+  "name": "@transak/transak-sdk",
+  "version": "1.0.29",
+  "description": "Transak SDK that allows you to easily integrate the fiat on/ramp",
+  "main": "dist/sdk.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "browserify ./src/index.js -o ./dist/sdk.js -p esmify -s TransakSDK"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Transak/transak-sdk.git"
+  },
+  "keywords": [
+    "fiat",
+    "ramp",
+    "on",
+    "off",
+    "cryptocurrency"
+  ],
+  "author": "Transak",
+  "license": "ISC",
+  "dependencies": {
+    "events": "^3.1.0",
+    "query-string": "^6.12.1",
+    "request": "^2.88.2"
+  },
+  "devDependencies": {
+    "browserify": "^16.5.0",
+    "esmify": "^2.1.1"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
+
+},{}],8:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1144,7 +1254,7 @@ function getCSS(themeColor, height, width) {
 `;
 }
 
-},{}],7:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1167,7 +1277,7 @@ let closeSVGIcon = `<svg version="1.1" fill="currentColor" id="Capa_1" xmlns="ht
 </svg>`;
 exports.closeSVGIcon = closeSVGIcon;
 
-},{}],8:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1181,7 +1291,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{}],9:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1200,7 +1310,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{}],10:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1237,7 +1347,7 @@ var _default = {
 };
 exports.default = _default;
 
-},{}],11:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1270,7 +1380,7 @@ var _events = _interopRequireDefault(require("./events"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"./errors":8,"./events":9,"./globalConfig":10}],12:[function(require,module,exports){
+},{"./errors":10,"./events":11,"./globalConfig":12}],14:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1290,11 +1400,14 @@ var _css = require("./assets/css");
 
 var _queryString = _interopRequireDefault(require("query-string"));
 
+var _package = require("../package.json");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const eventEmitter = new _events.default.EventEmitter();
 
 function TransakSDK(partnerData) {
+  this.sdkVersion = _package.version;
   this.partnerData = partnerData;
   this.isInitialised = false;
   this.EVENTS = _constants.EVENTS;
@@ -1343,10 +1456,12 @@ TransakSDK.prototype.modal = async function () {
         width,
         height,
         partnerData
-      } = await generateURL(this.partnerData);
+      } = await generateURL({ ...this.partnerData,
+        sdkVersion: this.sdkVersion
+      });
       let wrapper = document.createElement('div');
       wrapper.id = "transakFiatOnOffRamp";
-      wrapper.innerHTML = `<div class="transak_modal-overlay" id="transak_modal-overlay"></div><div class="transak_modal" id="transak_modal"><div class="transak_modal-content"><span class="transak_close">${_svg.closeSVGIcon}</span><div class="transakContainer"><iframe id="transakOnOffRampWidget" src="${url}" style="width: ${width}; height: ${height}"></iframe></div></div></div>`;
+      wrapper.innerHTML = `<div class="transak_modal-overlay" id="transak_modal-overlay"></div><div class="transak_modal" id="transak_modal"><div class="transak_modal-content"><span class="transak_close">${_svg.closeSVGIcon}</span><div class="transakContainer"><iframe id="transakOnOffRampWidget" allow="camera;fullscreen;accelerometer;gyroscope;magnetometer" allowFullScreen src="${url}" style="width: ${width}; height: ${height}"></iframe></div></div></div>`;
       let container = document.getElementsByTagName("body");
       if (!container) container = document.getElementsByTagName("html");
       if (!container) container = document.getElementsByTagName("div");
@@ -1398,6 +1513,7 @@ async function generateURL(configData) {
         // if (partnerDataBackend) {
 
         partnerData.apiKey = configData.apiKey;
+        if (configData.sdkVersion) partnerData.sdkVersion = configData.sdkVersion;
         if (configData.cryptoCurrencyCode) partnerData.cryptoCurrencyCode = configData.cryptoCurrencyCode;
         if (configData.defaultCryptoCurrency) partnerData.defaultCryptoCurrency = configData.defaultCryptoCurrency;
         if (configData.walletAddress) partnerData.walletAddress = configData.walletAddress;
@@ -1545,7 +1661,7 @@ function handleMessage(event) {
 var _default = TransakSDK;
 exports.default = _default;
 
-},{"./assets/css":6,"./assets/svg":7,"./constants":11,"./utils/generalUtil":13,"events":1,"query-string":3}],13:[function(require,module,exports){
+},{"../package.json":7,"./assets/css":8,"./assets/svg":9,"./constants":13,"./utils/generalUtil":15,"events":1,"query-string":4}],15:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1575,5 +1691,5 @@ var _default = {
 };
 exports.default = _default;
 
-},{}]},{},[12])(12)
+},{}]},{},[14])(14)
 });
