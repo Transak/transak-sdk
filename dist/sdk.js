@@ -1353,6 +1353,12 @@ exports.default = _default;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+Object.defineProperty(exports, "EVENTS", {
+  enumerable: true,
+  get: function () {
+    return _events.default;
+  }
+});
 Object.defineProperty(exports, "config", {
   enumerable: true,
   get: function () {
@@ -1363,12 +1369,6 @@ Object.defineProperty(exports, "errorsLang", {
   enumerable: true,
   get: function () {
     return _errors.default;
-  }
-});
-Object.defineProperty(exports, "EVENTS", {
-  enumerable: true,
-  get: function () {
-    return _events.default;
   }
 });
 
@@ -1552,6 +1552,7 @@ async function generateURL(configData) {
         if (configData.cryptoCurrencyList) partnerData.cryptoCurrencyList = configData.cryptoCurrencyList.split(',');
         if (configData.networks) partnerData.networks = configData.networks.split(',');
         if (configData.defaultNetwork) partnerData.defaultNetwork = configData.defaultNetwork;
+        if (configData.network) partnerData.network = configData.network;
         queryString = _queryString.default.stringify(partnerData, {
           arrayFormat: 'comma'
         });
