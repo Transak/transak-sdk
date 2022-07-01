@@ -1,5 +1,5 @@
-export function getCSS(themeColor, height, width) {
-    return `
+export function getCSS(themeColor: string, height: any, width: any) {
+  return `
 /* Modal Content/Box */
 .transak_close {
     float: right;

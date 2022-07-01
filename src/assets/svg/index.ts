@@ -1,4 +1,4 @@
-let closeSVGIcon  = `<svg version="1.1" fill="currentColor" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+const closeSVGIcon = `<svg version="1.1" fill="currentColor" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 \t viewBox="0 0 612 612" style="enable-background:new 0 0 612 612;" xml:space="preserve">
 <g>
 \t<g id="_x31_0_23_">
@@ -11,7 +11,6 @@ let closeSVGIcon  = `<svg version="1.1" fill="currentColor" id="Capa_1" xmlns="h
 \t\t</g>
 \t</g>
 </g>
-</svg>`;
+</svg>`
 
-export {closeSVGIcon}
-
+export { closeSVGIcon }

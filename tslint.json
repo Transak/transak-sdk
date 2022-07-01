@@ -1,0 +1,9 @@
+{
+  "extends": ["tslint:recommended", "tslint-config-prettier"],
+  "rules": {
+    "object-literal-sort-keys": false, //Disable for typescript
+    "curly": false, //if statements must be braced
+    "only-arrow-functions": false, //Disable for typescript
+    "ordered-imports": false
+  }
+}
