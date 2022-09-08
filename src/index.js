@@ -94,47 +94,12 @@ async function generateURL(configData) {
             }
             try {
                 environment = environment.toUpperCase();
-                // let partnerDataBackend = await fetchAPIKey(configData.apiKey, config.ENVIRONMENT[environment].BACKEND);
-                // if (partnerDataBackend) {
-                partnerData.apiKey = configData.apiKey;
-                if (configData.sdkVersion) partnerData.sdkVersion = configData.sdkVersion;
-                if (configData.cryptoCurrencyCode) partnerData.cryptoCurrencyCode = configData.cryptoCurrencyCode;
-                if (configData.defaultCryptoCurrency) partnerData.defaultCryptoCurrency = configData.defaultCryptoCurrency;
-                if (configData.walletAddress) partnerData.walletAddress = configData.walletAddress;
-                if (configData.themeColor) partnerData.themeColor = configData.themeColor.replace("#", "");
-                if (configData.walletAddress) partnerData.walletAddress = configData.walletAddress;
-                if (configData.fiatAmount) partnerData.fiatAmount = configData.fiatAmount;
-                if (configData.defaultFiatAmount) partnerData.defaultFiatAmount = configData.defaultFiatAmount;
-                if (configData.defaultCryptoAmount) partnerData.defaultCryptoAmount = configData.defaultCryptoAmount;
-                if (configData.walletAddressesData && (configData.walletAddressesData.networks || configData.walletAddressesData.coins)) {
-                    partnerData.walletAddressesData = {}
-                    if (configData.walletAddressesData.networks) partnerData.walletAddressesData.networks = configData.walletAddressesData.networks;
-                    if (configData.walletAddressesData.coins) partnerData.walletAddressesData.coins = configData.walletAddressesData.coins;
-                    partnerData.walletAddressesData = JSON.stringify(partnerData.walletAddressesData)
-                }
-                if (configData.fiatCurrency) partnerData.fiatCurrency = configData.fiatCurrency;
-                if (configData.countryCode) partnerData.countryCode = configData.countryCode;
-                if (configData.paymentMethod) partnerData.paymentMethod = configData.paymentMethod;
-                if (configData.defaultPaymentMethod) partnerData.defaultPaymentMethod = configData.defaultPaymentMethod;
-                if (configData.isAutoFillUserData) partnerData.isAutoFillUserData = configData.isAutoFillUserData;
-                if (configData.isFeeCalculationHidden) partnerData.isFeeCalculationHidden = configData.isFeeCalculationHidden;
-                if (configData.disablePaymentMethods) partnerData.disablePaymentMethods = configData.disablePaymentMethods;
-                if (configData.email) partnerData.email = configData.email;
-                if (configData.userData) partnerData.userData = JSON.stringify(configData.userData)
-                if (configData.partnerOrderId) partnerData.partnerOrderId = configData.partnerOrderId;
-                if (configData.partnerCustomerId) partnerData.partnerCustomerId = configData.partnerCustomerId;
-                if (configData.exchangeScreenTitle) partnerData.exchangeScreenTitle = configData.exchangeScreenTitle;
-                if (configData.hideMenu) partnerData.hideMenu = configData.hideMenu;
-                if (configData.accessToken) partnerData.accessToken = configData.accessToken;
-                if (configData.hideExchangeScreen) partnerData.hideExchangeScreen = configData.hideExchangeScreen;
-                if (configData.isDisableCrypto) partnerData.isDisableCrypto = configData.isDisableCrypto;
-                if (configData.redirectURL) partnerData.redirectURL = configData.redirectURL;
-                if (configData.hostURL) partnerData.hostURL = (configData.hostURL ? configData.hostURL : window.location.origin);
-                if (configData.disableWalletAddressForm) partnerData.disableWalletAddressForm = configData.disableWalletAddressForm;
-                if (configData.cryptoCurrencyList) partnerData.cryptoCurrencyList = configData.cryptoCurrencyList.split(',');
-                if (configData.networks) partnerData.networks = configData.networks.split(',');
-                if (configData.defaultNetwork) partnerData.defaultNetwork = configData.defaultNetwork;
-                if (configData.network) partnerData.network = configData.network;
+                Object.keys(configData).map((key) => {
+                    if (configData[key] instanceof Object) {
+                        partnerData[key] = JSON.stringify(configData[key]);
+                    } else partnerData[key] = configData[key];
+                  });
+
                 queryString = queryStringLib.stringify(partnerData, {arrayFormat: 'comma'});
             } catch (e) {
                 throw(e)
