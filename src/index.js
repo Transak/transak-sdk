@@ -1,8 +1,8 @@
 import events from 'events';
-import {config, errorsLang, EVENTS} from "./constants";
-import {UrlEncode} from "./utils/generalUtil";
-import {closeSVGIcon} from './assets/svg';
-import {getCSS} from './assets/css';
+import { config, errorsLang, EVENTS } from "./constants";
+import { UrlEncode } from "./utils/generalUtil";
+import { closeSVGIcon } from './assets/svg';
+import { getCSS } from './assets/css';
 import queryStringLib from 'query-string'
 import { version } from "../package.json"
 
@@ -47,7 +47,7 @@ TransakSDK.prototype.closeRequest = function () {
 TransakSDK.prototype.modal = async function () {
     try {
         if (this.partnerData) {
-            let {url, width, height, partnerData} = await generateURL({ ...this.partnerData, sdkVersion: this.sdkVersion });
+            let { url, width, height, partnerData } = await generateURL({ ...this.partnerData, sdkVersion: this.sdkVersion });
             let wrapper = document.createElement('div');
             wrapper.id = "transakFiatOnOffRamp";
             wrapper.innerHTML = `<div class="transak_modal-overlay" id="transak_modal-overlay"></div><div class="transak_modal" id="transak_modal"><div class="transak_modal-content"><span class="transak_close">${closeSVGIcon}</span><div class="transakContainer"><iframe id="transakOnOffRampWidget" allow="camera;fullscreen;accelerometer;gyroscope;magnetometer" allowFullScreen src="${url}" style="width: ${width}; height: ${height}"></iframe></div></div></div>`;
@@ -81,7 +81,7 @@ TransakSDK.prototype.modal = async function () {
             else window.attachEvent("onmessage", handleMessage);
         }
     } catch (e) {
-        throw(e)
+        throw (e)
     }
 }
 
@@ -94,57 +94,21 @@ async function generateURL(configData) {
             }
             try {
                 environment = environment.toUpperCase();
-                // let partnerDataBackend = await fetchAPIKey(configData.apiKey, config.ENVIRONMENT[environment].BACKEND);
-                // if (partnerDataBackend) {
-                partnerData.apiKey = configData.apiKey;
-                if (configData.sdkVersion) partnerData.sdkVersion = configData.sdkVersion;
-                if (configData.cryptoCurrencyCode) partnerData.cryptoCurrencyCode = configData.cryptoCurrencyCode;
-                if (configData.defaultCryptoCurrency) partnerData.defaultCryptoCurrency = configData.defaultCryptoCurrency;
-                if (configData.walletAddress) partnerData.walletAddress = configData.walletAddress;
-                if (configData.themeColor) partnerData.themeColor = configData.themeColor.replace("#", "");
-                if (configData.walletAddress) partnerData.walletAddress = configData.walletAddress;
-                if (configData.fiatAmount) partnerData.fiatAmount = configData.fiatAmount;
-                if (configData.defaultFiatAmount) partnerData.defaultFiatAmount = configData.defaultFiatAmount;
-                if (configData.defaultCryptoAmount) partnerData.defaultCryptoAmount = configData.defaultCryptoAmount;
-                if (configData.walletAddressesData && (configData.walletAddressesData.networks || configData.walletAddressesData.coins)) {
-                    partnerData.walletAddressesData = {}
-                    if (configData.walletAddressesData.networks) partnerData.walletAddressesData.networks = configData.walletAddressesData.networks;
-                    if (configData.walletAddressesData.coins) partnerData.walletAddressesData.coins = configData.walletAddressesData.coins;
-                    partnerData.walletAddressesData = JSON.stringify(partnerData.walletAddressesData)
-                }
-                if (configData.fiatCurrency) partnerData.fiatCurrency = configData.fiatCurrency;
-                if (configData.countryCode) partnerData.countryCode = configData.countryCode;
-                if (configData.paymentMethod) partnerData.paymentMethod = configData.paymentMethod;
-                if (configData.defaultPaymentMethod) partnerData.defaultPaymentMethod = configData.defaultPaymentMethod;
-                if (configData.isAutoFillUserData) partnerData.isAutoFillUserData = configData.isAutoFillUserData;
-                if (configData.isFeeCalculationHidden) partnerData.isFeeCalculationHidden = configData.isFeeCalculationHidden;
-                if (configData.disablePaymentMethods) partnerData.disablePaymentMethods = configData.disablePaymentMethods;
-                if (configData.email) partnerData.email = configData.email;
-                if (configData.userData) partnerData.userData = JSON.stringify(configData.userData)
-                if (configData.partnerOrderId) partnerData.partnerOrderId = configData.partnerOrderId;
-                if (configData.partnerCustomerId) partnerData.partnerCustomerId = configData.partnerCustomerId;
-                if (configData.exchangeScreenTitle) partnerData.exchangeScreenTitle = configData.exchangeScreenTitle;
-                if (configData.hideMenu) partnerData.hideMenu = configData.hideMenu;
-                if (configData.accessToken) partnerData.accessToken = configData.accessToken;
-                if (configData.hideExchangeScreen) partnerData.hideExchangeScreen = configData.hideExchangeScreen;
-                if (configData.isDisableCrypto) partnerData.isDisableCrypto = configData.isDisableCrypto;
-                if (configData.redirectURL) partnerData.redirectURL = configData.redirectURL;
-                if (configData.hostURL) partnerData.hostURL = (configData.hostURL ? configData.hostURL : window.location.origin);
-                if (configData.disableWalletAddressForm) partnerData.disableWalletAddressForm = configData.disableWalletAddressForm;
-                if (configData.cryptoCurrencyList) partnerData.cryptoCurrencyList = configData.cryptoCurrencyList.split(',');
-                if (configData.networks) partnerData.networks = configData.networks.split(',');
-                if (configData.defaultNetwork) partnerData.defaultNetwork = configData.defaultNetwork;
-                if (configData.network) partnerData.network = configData.network;
-                queryString = queryStringLib.stringify(partnerData, {arrayFormat: 'comma'});
+                Object.keys(configData).map((key) => {
+                    if (configData[key] instanceof Object) {
+                        partnerData[key] = JSON.stringify(configData[key]);
+                    } else partnerData[key] = configData[key];
+                });
+                queryString = queryStringLib.stringify(partnerData, { arrayFormat: 'comma' });
             } catch (e) {
-                throw(e)
+                throw (e)
             }
         }
-        else throw(errorsLang.ENTER_API_KEY);
+        else throw (errorsLang.ENTER_API_KEY);
         if (configData.widgetWidth) width = configData.widgetWidth;
         if (configData.widgetHeight) height = configData.widgetHeight;
     }
-    return {width, height, partnerData, url: `${config.ENVIRONMENT[environment].FRONTEND}?${queryString}`}
+    return { width, height, partnerData, url: `${config.ENVIRONMENT[environment].FRONTEND}?${queryString}` }
 }
 
 async function setStyle(themeColor, width, height) {
@@ -216,7 +180,7 @@ function handleMessage(event) {
                     });
                     break;
                 }
-                default : {
+                default: {
                 }
             }
         }
