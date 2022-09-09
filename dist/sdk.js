@@ -1075,7 +1075,7 @@ module.exports = str => encodeURIComponent(str).replace(/[!'()*]/g, x => `%${x.c
 },{}],7:[function(require,module,exports){
 module.exports={
   "name": "@transak/transak-sdk",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Transak SDK that allows you to easily integrate the fiat on/ramp",
   "main": "dist/sdk.js",
   "scripts": {
@@ -1319,7 +1319,7 @@ exports.default = void 0;
 var _default = {
   ENVIRONMENT: {
     STAGING: {
-      FRONTEND: 'https://staging-global.transak.com',
+      FRONTEND: 'https://global-stg.transak.com',
       BACKEND: 'https://staging-api.transak.com/api/v1',
       NAME: 'STAGING'
     },
@@ -1327,11 +1327,6 @@ var _default = {
       FRONTEND: 'http://localhost:3000',
       BACKEND: 'http://localhost:8292/api/v2',
       NAME: 'LOCAL_DEVELOPMENT'
-    },
-    DEVELOPMENT: {
-      FRONTEND: 'https://development-global.transak.com',
-      BACKEND: 'https://development-api.transak.com/api/v2',
-      NAME: 'DEVELOPMENT'
     },
     PRODUCTION: {
       FRONTEND: 'https://global.transak.com',
