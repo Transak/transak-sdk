@@ -123,7 +123,6 @@ function handleMessage(event) {
     if (event.origin === config.ENVIRONMENT.LOCAL_DEVELOPMENT.FRONTEND) environment = config.ENVIRONMENT.LOCAL_DEVELOPMENT.NAME;
     else if (event.origin === config.ENVIRONMENT.PRODUCTION.FRONTEND) environment = config.ENVIRONMENT.PRODUCTION.NAME;
     else if (event.origin === config.ENVIRONMENT.STAGING.FRONTEND) environment = config.ENVIRONMENT.STAGING.NAME;
-    else if (event.origin === config.ENVIRONMENT.DEVELOPMENT.FRONTEND) environment = config.ENVIRONMENT.DEVELOPMENT.NAME;
 
     if (environment) {
         if (event && event.data && event.data.event_id) {
