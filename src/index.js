@@ -88,6 +88,7 @@ TransakSDK.prototype.modal = async function () {
 async function generateURL(configData) {
     let partnerData = {}, environment = 'development', queryString = "", width = "100%", height = "100%";
     if (configData) {
+        configData.hostURL = window.location.origin;
         if (configData.apiKey) {
             if (configData.environment) {
                 if (config.ENVIRONMENT[configData.environment]) environment = config.ENVIRONMENT[configData.environment].NAME

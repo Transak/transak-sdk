@@ -1075,7 +1075,7 @@ module.exports = str => encodeURIComponent(str).replace(/[!'()*]/g, x => `%${x.c
 },{}],7:[function(require,module,exports){
 module.exports={
   "name": "@transak/transak-sdk",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Transak SDK that allows you to easily integrate the fiat on/ramp",
   "main": "dist/sdk.js",
   "scripts": {
@@ -1497,6 +1497,8 @@ async function generateURL(configData) {
       height = "100%";
 
   if (configData) {
+    configData.hostURL = window.location.origin;
+
     if (configData.apiKey) {
       if (configData.environment) {
         if (_constants.config.ENVIRONMENT[configData.environment]) environment = _constants.config.ENVIRONMENT[configData.environment].NAME;

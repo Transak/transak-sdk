@@ -27,8 +27,6 @@ import transakSDK from '@transak/transak-sdk'
 let transak = new transakSDK({
     apiKey: '4fcd6904-706b-4aff-bd9d-77422813bbb7', // Your API Key (Required)
     environment: 'STAGING', // STAGING/PRODUCTION (Required)
-    hostURL: window.location.origin, // (Required)
-
     walletAddress: '', // Your customer wallet address
     themeColor: '000000', // App theme color in hex
     email: '', // Your customer email address (Optional)
