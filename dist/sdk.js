@@ -1320,12 +1320,12 @@ var _default = {
   ENVIRONMENT: {
     STAGING: {
       FRONTEND: 'https://global-stg.transak.com',
-      BACKEND: 'https://staging-api.transak.com/api/v1',
+      BACKEND: 'https://api-stg.transak.com/api/v2',
       NAME: 'STAGING'
     },
     LOCAL_DEVELOPMENT: {
-      FRONTEND: 'http://localhost:3000',
-      BACKEND: 'http://localhost:8292/api/v2',
+      FRONTEND: 'http://localhost:5005',
+      BACKEND: 'https://api-stg.transak.com/api/v2',
       NAME: 'LOCAL_DEVELOPMENT'
     },
     PRODUCTION: {
