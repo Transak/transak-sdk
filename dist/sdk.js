@@ -1075,7 +1075,7 @@ module.exports = str => encodeURIComponent(str).replace(/[!'()*]/g, x => `%${x.c
 },{}],7:[function(require,module,exports){
 module.exports={
   "name": "@transak/transak-sdk",
-  "version": "1.2.2",
+  "version": "1.3.0",
   "description": "Transak SDK that allows you to easily integrate the fiat on/ramp",
   "main": "dist/sdk.js",
   "scripts": {
@@ -1384,15 +1384,13 @@ exports.default = void 0;
 
 var _events = _interopRequireDefault(require("events"));
 
-var _constants = require("./constants");
+var _queryString = _interopRequireDefault(require("query-string"));
 
-var _generalUtil = require("./utils/generalUtil");
+var _constants = require("./constants");
 
 var _svg = require("./assets/svg");
 
 var _css = require("./assets/css");
-
-var _queryString = _interopRequireDefault(require("query-string"));
 
 var _package = require("../package.json");
 
@@ -1425,11 +1423,11 @@ TransakSDK.prototype.init = function () {
 };
 
 TransakSDK.prototype.close = async function () {
-  let modal = document.getElementById("transakFiatOnOffRamp");
+  let modal = document.getElementById('transakFiatOnOffRamp');
 
   if (modal && modal.style) {
-    modal.style.display = "none";
-    modal.innerHTML = "";
+    modal.style.display = 'none';
+    modal.innerHTML = '';
     await modal.remove();
   }
 };
@@ -1454,19 +1452,19 @@ TransakSDK.prototype.modal = async function () {
         sdkVersion: this.sdkVersion
       });
       let wrapper = document.createElement('div');
-      wrapper.id = "transakFiatOnOffRamp";
-      wrapper.innerHTML = `<div class="transak_modal-overlay" id="transak_modal-overlay"></div><div class="transak_modal" id="transak_modal"><div class="transak_modal-content"><span class="transak_close">${_svg.closeSVGIcon}</span><div class="transakContainer"><iframe id="transakOnOffRampWidget" allow="camera;fullscreen;accelerometer;gyroscope;magnetometer" allowFullScreen src="${url}" style="width: ${width}; height: ${height}"></iframe></div></div></div>`;
-      let container = document.getElementsByTagName("body");
-      if (!container) container = document.getElementsByTagName("html");
-      if (!container) container = document.getElementsByTagName("div");
+      wrapper.id = 'transakFiatOnOffRamp';
+      wrapper.innerHTML = `<div class="transak_modal-overlay" id="transak_modal-overlay"></div><div class="transak_modal" id="transak_modal"><div class="transak_modal-content"><span class="transak_close">${_svg.closeSVGIcon}</span><div class="transakContainer"><iframe id="transakOnOffRampWidget" allow="camera;microphone;fullscreen;payment" allowFullScreen src="${url}" style="width: ${width}; height: ${height}"></iframe></div></div></div>`;
+      let container = document.getElementsByTagName('body');
+      if (!container) container = document.getElementsByTagName('html');
+      if (!container) container = document.getElementsByTagName('div');
       await container[0].appendChild(wrapper);
       await setStyle(this.partnerData.themeColor, width, height);
-      let modal = document.getElementById("transakFiatOnOffRamp");
-      let span = document.getElementsByClassName("transak_close")[0]; //Prevent background scrolling when overlay appears
+      let modal = document.getElementById('transakFiatOnOffRamp');
+      let span = document.getElementsByClassName('transak_close')[0]; //Prevent background scrolling when overlay appears
 
       document.documentElement.style.overflow = 'hidden';
-      document.body.scroll = "no";
-      if (modal && modal.style) modal.style.display = "block";
+      document.body.scroll = 'no';
+      if (modal && modal.style) modal.style.display = 'block';
       this.isInitialised = true;
       eventEmitter.emit(_constants.EVENTS.TRANSAK_WIDGET_INITIALISED, {
         status: true,
@@ -1479,10 +1477,10 @@ TransakSDK.prototype.modal = async function () {
 
 
       window.onclick = event => {
-        if (event.target === document.getElementById("transak_modal-overlay")) this.closeRequest();
+        if (event.target === document.getElementById('transak_modal-overlay')) this.closeRequest();
       };
 
-      if (window.addEventListener) window.addEventListener("message", handleMessage);else window.attachEvent("onmessage", handleMessage);
+      if (window.addEventListener) window.addEventListener('message', handleMessage);else window.attachEvent('onmessage', handleMessage);
     }
   } catch (e) {
     throw e;
@@ -1492,9 +1490,9 @@ TransakSDK.prototype.modal = async function () {
 async function generateURL(configData) {
   let partnerData = {},
       environment = 'development',
-      queryString = "",
-      width = "100%",
-      height = "100%";
+      queryString = '',
+      width = '100%',
+      height = '100%';
 
   if (configData) {
     configData.hostURL = window.location.origin;
@@ -1534,7 +1532,7 @@ async function generateURL(configData) {
 async function setStyle(themeColor, width, height) {
   let style = await document.createElement('style');
   style.innerHTML = (0, _css.getCSS)(themeColor, height, width);
-  let modal = document.getElementById("transakFiatOnOffRamp");
+  let modal = document.getElementById('transakFiatOnOffRamp');
   if (modal) await modal.appendChild(style);
 }
 
@@ -1553,12 +1551,12 @@ function handleMessage(event) {
             }); //enable background scrolling when overlay appears
 
             document.documentElement.style.overflow = 'scroll';
-            document.body.scroll = "yes";
-            let modal = document.getElementById("transakFiatOnOffRamp");
+            document.body.scroll = 'yes';
+            let modal = document.getElementById('transakFiatOnOffRamp');
 
             if (modal && modal.style) {
-              modal.style.display = "none";
-              modal.innerHTML = "";
+              modal.style.display = 'none';
+              modal.innerHTML = '';
               modal.remove();
             }
 
@@ -1620,35 +1618,5 @@ function handleMessage(event) {
 var _default = TransakSDK;
 exports.default = _default;
 
-},{"../package.json":7,"./assets/css":8,"./assets/svg":9,"./constants":13,"./utils/generalUtil":15,"events":1,"query-string":4}],15:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.UrlEncode = UrlEncode;
-exports.default = void 0;
-
-function UrlEncode(data, encodeornot) {
-  if (typeof data == 'object') {
-    let out = [];
-
-    for (let key in data) {
-      out.push(key + '=' + (encodeornot ? encodeURIComponent(data[key]) : data[key]));
-    }
-
-    let finalStr = out.join('&');
-    return finalStr;
-  } else {
-    console.warn('error occur');
-  }
-}
-
-;
-var _default = {
-  UrlEncode
-};
-exports.default = _default;
-
-},{}]},{},[14])(14)
+},{"../package.json":7,"./assets/css":8,"./assets/svg":9,"./constants":13,"events":1,"query-string":4}]},{},[14])(14)
 });
