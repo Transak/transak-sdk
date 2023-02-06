@@ -2,11 +2,7 @@
 
 A JavaScript library for decentralised applications to onboard their global user base with fiat currency.
 
-### Installation
-
-To use the Transak widget with your javascript application, you will need to
-use `[@transak/transak-sdk](https://www.npmjs.com/package/@transak/transak-sdk)` (Transak’s JavaScript SDK). Add the
-Transak SDK as a dependency using `yarn` or `npm`:
+## Installation
 
 ```sh
 # Using yarn
@@ -16,41 +12,36 @@ $ yarn add @transak/transak-sdk
 $ npm install @transak/transak-sdk
 ```
 
-For the advance customization, view
-our [query parameter documentation.](https://docs.transak.com/docs/query-parameters)
+## Example usage
 
-### Example usage
+Refer here for the full list of [customisation options](https://docs.transak.com/docs/query-parameters)
 
-```sh
-import transakSDK from '@transak/transak-sdk'
+```js
+import transakSDK from '@transak/transak-sdk';
 
 let transak = new transakSDK({
-    apiKey: '4fcd6904-706b-4aff-bd9d-77422813bbb7', // Your API Key (Required)
-    environment: 'STAGING', // STAGING/PRODUCTION (Required)
-    walletAddress: '', // Your customer wallet address
-    themeColor: '000000', // App theme color in hex
-    email: '', // Your customer email address (Optional)
-    redirectURL: '',
-    widgetHeight: '550px',
-    widgetWidth: '450px'
+  apiKey: '<your-api-key>', // (Required)
+  environment: '<environment: STAGING/PRODUCTION>', // (Required)
+  // .....
+  // For the full list of customisation options check the link above
 });
 
 transak.init();
 
 // To get all the events
 transak.on(transak.ALL_EVENTS, (data) => {
-		console.log(data)
+  console.log(data);
 });
 
 // This will trigger when the user closed the widget
 transak.on(transak.EVENTS.TRANSAK_WIDGET_CLOSE, (orderData) => {
-    transak.close();
+  transak.close();
 });
 
-// This will trigger when the user marks payment is made.
+// This will trigger when the user marks payment is made
 transak.on(transak.EVENTS.TRANSAK_ORDER_SUCCESSFUL, (orderData) => {
-    console.log(orderData);
-    transak.close();
+  console.log(orderData);
+  transak.close();
 });
 ```
 
