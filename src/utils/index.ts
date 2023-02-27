@@ -46,7 +46,6 @@ async function generateURL(configData: IConfig) {
         if (configData.exchangeScreenTitle) partnerData.exchangeScreenTitle = configData.exchangeScreenTitle
         if (configData.hideMenu) partnerData.hideMenu = configData.hideMenu
         if (configData.accessToken) partnerData.accessToken = configData.accessToken
-        if (configData.hideExchangeScreen) partnerData.hideExchangeScreen = configData.hideExchangeScreen
         if (configData.isDisableCrypto) partnerData.isDisableCrypto = configData.isDisableCrypto
         if (configData.redirectURL) partnerData.redirectURL = configData.redirectURL
         if (configData.disableWalletAddressForm) partnerData.disableWalletAddressForm = configData.disableWalletAddressForm

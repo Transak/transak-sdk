@@ -8,10 +8,8 @@ export interface IConfigBasic {
   apiKey: string
   environment: environments
   cryptoCurrencyCode?: string
-  fiatCurrencyCode?: string
   themeColor?: string
   defaultCryptoCurrency?: string
-  defaultFiatCurrency?: string
   walletAddress?: string
   fiatAmount?: number
   defaultFiatAmount?: number
@@ -28,8 +26,7 @@ export interface IConfigBasic {
   partnerCustomerId?: string
   exchangeScreenTitle?: string
   hideMenu?: boolean
-  accessToken?: string
-  hideExchangeScreen?: boolean
+  accessToken?: string // verify and remove if not requiered  any more
   isDisableCrypto?: boolean
   redirectURL?: string
   disableWalletAddressForm?: boolean
@@ -37,6 +34,7 @@ export interface IConfigBasic {
   network?: string
   widgetWidth?: string | number
   widgetHeight?: string | number
+  excludeFiatCurrencies?: string
 }
 export interface IQueryParams extends IConfigBasic {
   networks?: string
@@ -75,4 +73,28 @@ export interface IGenerateURLReturn extends IConfigBasic {
 }
 export interface IConfig extends IQueryParams {
   sdkVersion: string
+}
+
+export enum EventTypes {
+  ALL_EVENTS = "*",
+  TRANSAK_WIDGET_INITIALISED = "TRANSAK_WIDGET_INITIALISED",
+  TRANSAK_WIDGET_OPEN = "TRANSAK_WIDGET_OPEN",
+  TRANSAK_WIDGET_CLOSE_REQUEST = "TRANSAK_WIDGET_CLOSE_REQUEST",
+  TRANSAK_WIDGET_CLOSE = "TRANSAK_WIDGET_CLOSE",
+  TRANSAK_ORDER_CREATED = "TRANSAK_ORDER_CREATED",
+  TRANSAK_ORDER_CANCELLED = "TRANSAK_ORDER_CANCELLED",
+  TRANSAK_ORDER_FAILED = "TRANSAK_ORDER_FAILED",
+  TRANSAK_ORDER_SUCCESSFUL = "TRANSAK_ORDER_SUCCESSFUL",
+  TRANSAK_ERROR = "TRANSAK_ERROR",
+}
+
+export interface IEventObject {
+  TRANSAK_WIDGET_INITIALISED: "TRANSAK_WIDGET_INITIALISED"
+  TRANSAK_WIDGET_OPEN: "TRANSAK_WIDGET_OPEN"
+  TRANSAK_WIDGET_CLOSE_REQUEST: "TRANSAK_WIDGET_CLOSE_REQUEST"
+  TRANSAK_WIDGET_CLOSE: "TRANSAK_WIDGET_CLOSE"
+  TRANSAK_ORDER_CREATED: "TRANSAK_ORDER_CREATED"
+  TRANSAK_ORDER_CANCELLED: "TRANSAK_ORDER_CANCELLED"
+  TRANSAK_ORDER_FAILED: "TRANSAK_ORDER_FAILED"
+  TRANSAK_ORDER_SUCCESSFUL: "TRANSAK_ORDER_SUCCESSFUL"
 }

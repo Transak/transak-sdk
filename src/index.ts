@@ -1,6 +1,6 @@
 import { EventEmitter } from "events"
 import { config, EVENTS } from "./constants"
-import { IQueryParams } from "./interfaces"
+import { EventTypes, IQueryParams } from "./interfaces"
 import { generateURL } from "./utils"
 import { closeSVGIcon } from "./assets/svg"
 import { getCSS } from "./assets/css"
@@ -9,28 +9,13 @@ import { version } from "../package.json"
 
 const eventEmitter = new EventEmitter()
 
-function TransakSDK(partnerData: IQueryParams) {
-  // @ts-ignore
+function TransakSDK(this: any, partnerData: IQueryParams) {
   this.sdkVersion = version
-  // @ts-ignore
   this.partnerData = partnerData
 }
 
-enum eventTypes {
-  ALL_EVENTS = "*",
-  TRANSAK_WIDGET_INITIALISED = "TRANSAK_WIDGET_INITIALISED",
-  TRANSAK_WIDGET_OPEN = "TRANSAK_WIDGET_OPEN",
-  TRANSAK_WIDGET_CLOSE_REQUEST = "TRANSAK_WIDGET_CLOSE_REQUEST",
-  TRANSAK_WIDGET_CLOSE = "TRANSAK_WIDGET_CLOSE",
-  TRANSAK_ORDER_CREATED = "TRANSAK_ORDER_CREATED",
-  TRANSAK_ORDER_CANCELLED = "TRANSAK_ORDER_CANCELLED",
-  TRANSAK_ORDER_FAILED = "TRANSAK_ORDER_FAILED",
-  TRANSAK_ORDER_SUCCESSFUL = "TRANSAK_ORDER_SUCCESSFUL",
-  TRANSAK_ERROR = "TRANSAK_ERROR",
-}
-
-TransakSDK.prototype.on = function (type: eventTypes, cb: any) {
-  if (type === eventTypes.ALL_EVENTS) {
+TransakSDK.prototype.on = function (type: EventTypes, cb: any) {
+  if (type === EventTypes.ALL_EVENTS) {
     for (const eventName in EVENTS) {
       if (EVENTS.hasOwnProperty(eventName)) {
         // @ts-ignore
@@ -40,7 +25,7 @@ TransakSDK.prototype.on = function (type: eventTypes, cb: any) {
   }
   // @ts-ignore
   if (EVENTS[type]) eventEmitter.on(type, cb)
-  if (type === eventTypes.TRANSAK_ERROR) eventEmitter.on(eventTypes.TRANSAK_ERROR, cb)
+  if (type === EventTypes.TRANSAK_ERROR) eventEmitter.on(EventTypes.TRANSAK_ERROR, cb)
 }
 
 TransakSDK.prototype.init = function () {
@@ -57,10 +42,9 @@ TransakSDK.prototype.close = async function () {
 }
 
 TransakSDK.prototype.closeRequest = function () {
-  const iframeEl = document.getElementById("transakOnOffRampWidget")
+  const iframeEl = document.getElementById("transakOnOffRampWidget") as HTMLIFrameElement
   if (iframeEl) {
-    // @ts-ignore
-    iframeEl.contentWindow.postMessage(
+    iframeEl.contentWindow?.postMessage(
       {
         event_id: EVENTS.TRANSAK_WIDGET_CLOSE_REQUEST,
         data: true,
