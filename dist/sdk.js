@@ -1,4 +1,85 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.TransakSDK = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = decodeUriComponent;
+const token = '%[a-f0-9]{2}';
+const singleMatcher = new RegExp('(' + token + ')|([^%]+?)', 'gi');
+const multiMatcher = new RegExp('(' + token + ')+', 'gi');
+function decodeComponents(components, split) {
+  try {
+    // Try to decode the entire string first
+    return [decodeURIComponent(components.join(''))];
+  } catch {
+    // Do nothing
+  }
+  if (components.length === 1) {
+    return components;
+  }
+  split = split || 1;
+
+  // Split the array in 2 parts
+  const left = components.slice(0, split);
+  const right = components.slice(split);
+  return Array.prototype.concat.call([], decodeComponents(left), decodeComponents(right));
+}
+function decode(input) {
+  try {
+    return decodeURIComponent(input);
+  } catch {
+    let tokens = input.match(singleMatcher) || [];
+    for (let i = 1; i < tokens.length; i++) {
+      input = decodeComponents(tokens, i).join('');
+      tokens = input.match(singleMatcher) || [];
+    }
+    return input;
+  }
+}
+function customDecodeURIComponent(input) {
+  // Keep track of all the replacements and prefill the map with the `BOM`
+  const replaceMap = {
+    '%FE%FF': '\uFFFD\uFFFD',
+    '%FF%FE': '\uFFFD\uFFFD'
+  };
+  let match = multiMatcher.exec(input);
+  while (match) {
+    try {
+      // Decode as big chunks as possible
+      replaceMap[match[0]] = decodeURIComponent(match[0]);
+    } catch {
+      const result = decode(match[0]);
+      if (result !== match[0]) {
+        replaceMap[match[0]] = result;
+      }
+    }
+    match = multiMatcher.exec(input);
+  }
+
+  // Add `%C2` at the end of the map to make sure it does not replace the combinator before everything else
+  replaceMap['%C2'] = '\uFFFD';
+  const entries = Object.keys(replaceMap);
+  for (const key of entries) {
+    // Replace all decoded components
+    input = input.replace(new RegExp(key, 'g'), replaceMap[key]);
+  }
+  return input;
+}
+function decodeUriComponent(encodedURI) {
+  if (typeof encodedURI !== 'string') {
+    throw new TypeError('Expected `encodedURI` to be of type `string`, got `' + typeof encodedURI + '`');
+  }
+  try {
+    // Try the built in decoder first
+    return decodeURIComponent(encodedURI);
+  } catch {
+    // Fallback to a more advanced decoder
+    return customDecodeURIComponent(encodedURI);
+  }
+}
+
+},{}],2:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -20,182 +101,143 @@
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-var objectCreate = Object.create || objectCreatePolyfill
-var objectKeys = Object.keys || objectKeysPolyfill
-var bind = Function.prototype.bind || functionBindPolyfill
+'use strict';
 
-function EventEmitter() {
-  if (!this._events || !Object.prototype.hasOwnProperty.call(this, '_events')) {
-    this._events = objectCreate(null);
-    this._eventsCount = 0;
+var R = typeof Reflect === 'object' ? Reflect : null
+var ReflectApply = R && typeof R.apply === 'function'
+  ? R.apply
+  : function ReflectApply(target, receiver, args) {
+    return Function.prototype.apply.call(target, receiver, args);
   }
 
-  this._maxListeners = this._maxListeners || undefined;
+var ReflectOwnKeys
+if (R && typeof R.ownKeys === 'function') {
+  ReflectOwnKeys = R.ownKeys
+} else if (Object.getOwnPropertySymbols) {
+  ReflectOwnKeys = function ReflectOwnKeys(target) {
+    return Object.getOwnPropertyNames(target)
+      .concat(Object.getOwnPropertySymbols(target));
+  };
+} else {
+  ReflectOwnKeys = function ReflectOwnKeys(target) {
+    return Object.getOwnPropertyNames(target);
+  };
+}
+
+function ProcessEmitWarning(warning) {
+  if (console && console.warn) console.warn(warning);
+}
+
+var NumberIsNaN = Number.isNaN || function NumberIsNaN(value) {
+  return value !== value;
+}
+
+function EventEmitter() {
+  EventEmitter.init.call(this);
 }
 module.exports = EventEmitter;
+module.exports.once = once;
 
 // Backwards-compat with node 0.10.x
 EventEmitter.EventEmitter = EventEmitter;
 
 EventEmitter.prototype._events = undefined;
+EventEmitter.prototype._eventsCount = 0;
 EventEmitter.prototype._maxListeners = undefined;
 
 // By default EventEmitters will print a warning if more than 10 listeners are
 // added to it. This is a useful default which helps finding memory leaks.
 var defaultMaxListeners = 10;
 
-var hasDefineProperty;
-try {
-  var o = {};
-  if (Object.defineProperty) Object.defineProperty(o, 'x', { value: 0 });
-  hasDefineProperty = o.x === 0;
-} catch (err) { hasDefineProperty = false }
-if (hasDefineProperty) {
-  Object.defineProperty(EventEmitter, 'defaultMaxListeners', {
-    enumerable: true,
-    get: function() {
-      return defaultMaxListeners;
-    },
-    set: function(arg) {
-      // check whether the input is a positive number (whose value is zero or
-      // greater and not a NaN).
-      if (typeof arg !== 'number' || arg < 0 || arg !== arg)
-        throw new TypeError('"defaultMaxListeners" must be a positive number');
-      defaultMaxListeners = arg;
-    }
-  });
-} else {
-  EventEmitter.defaultMaxListeners = defaultMaxListeners;
+function checkListener(listener) {
+  if (typeof listener !== 'function') {
+    throw new TypeError('The "listener" argument must be of type Function. Received type ' + typeof listener);
+  }
 }
+
+Object.defineProperty(EventEmitter, 'defaultMaxListeners', {
+  enumerable: true,
+  get: function() {
+    return defaultMaxListeners;
+  },
+  set: function(arg) {
+    if (typeof arg !== 'number' || arg < 0 || NumberIsNaN(arg)) {
+      throw new RangeError('The value of "defaultMaxListeners" is out of range. It must be a non-negative number. Received ' + arg + '.');
+    }
+    defaultMaxListeners = arg;
+  }
+});
+
+EventEmitter.init = function() {
+
+  if (this._events === undefined ||
+      this._events === Object.getPrototypeOf(this)._events) {
+    this._events = Object.create(null);
+    this._eventsCount = 0;
+  }
+
+  this._maxListeners = this._maxListeners || undefined;
+};
 
 // Obviously not all Emitters should be limited to 10. This function allows
 // that to be increased. Set to zero for unlimited.
 EventEmitter.prototype.setMaxListeners = function setMaxListeners(n) {
-  if (typeof n !== 'number' || n < 0 || isNaN(n))
-    throw new TypeError('"n" argument must be a positive number');
+  if (typeof n !== 'number' || n < 0 || NumberIsNaN(n)) {
+    throw new RangeError('The value of "n" is out of range. It must be a non-negative number. Received ' + n + '.');
+  }
   this._maxListeners = n;
   return this;
 };
 
-function $getMaxListeners(that) {
+function _getMaxListeners(that) {
   if (that._maxListeners === undefined)
     return EventEmitter.defaultMaxListeners;
   return that._maxListeners;
 }
 
 EventEmitter.prototype.getMaxListeners = function getMaxListeners() {
-  return $getMaxListeners(this);
+  return _getMaxListeners(this);
 };
 
-// These standalone emit* functions are used to optimize calling of event
-// handlers for fast cases because emit() itself often has a variable number of
-// arguments and can be deoptimized because of that. These functions always have
-// the same number of arguments and thus do not get deoptimized, so the code
-// inside them can execute faster.
-function emitNone(handler, isFn, self) {
-  if (isFn)
-    handler.call(self);
-  else {
-    var len = handler.length;
-    var listeners = arrayClone(handler, len);
-    for (var i = 0; i < len; ++i)
-      listeners[i].call(self);
-  }
-}
-function emitOne(handler, isFn, self, arg1) {
-  if (isFn)
-    handler.call(self, arg1);
-  else {
-    var len = handler.length;
-    var listeners = arrayClone(handler, len);
-    for (var i = 0; i < len; ++i)
-      listeners[i].call(self, arg1);
-  }
-}
-function emitTwo(handler, isFn, self, arg1, arg2) {
-  if (isFn)
-    handler.call(self, arg1, arg2);
-  else {
-    var len = handler.length;
-    var listeners = arrayClone(handler, len);
-    for (var i = 0; i < len; ++i)
-      listeners[i].call(self, arg1, arg2);
-  }
-}
-function emitThree(handler, isFn, self, arg1, arg2, arg3) {
-  if (isFn)
-    handler.call(self, arg1, arg2, arg3);
-  else {
-    var len = handler.length;
-    var listeners = arrayClone(handler, len);
-    for (var i = 0; i < len; ++i)
-      listeners[i].call(self, arg1, arg2, arg3);
-  }
-}
-
-function emitMany(handler, isFn, self, args) {
-  if (isFn)
-    handler.apply(self, args);
-  else {
-    var len = handler.length;
-    var listeners = arrayClone(handler, len);
-    for (var i = 0; i < len; ++i)
-      listeners[i].apply(self, args);
-  }
-}
-
 EventEmitter.prototype.emit = function emit(type) {
-  var er, handler, len, args, i, events;
+  var args = [];
+  for (var i = 1; i < arguments.length; i++) args.push(arguments[i]);
   var doError = (type === 'error');
 
-  events = this._events;
-  if (events)
-    doError = (doError && events.error == null);
+  var events = this._events;
+  if (events !== undefined)
+    doError = (doError && events.error === undefined);
   else if (!doError)
     return false;
 
   // If there is no 'error' event listener then throw.
   if (doError) {
-    if (arguments.length > 1)
-      er = arguments[1];
+    var er;
+    if (args.length > 0)
+      er = args[0];
     if (er instanceof Error) {
+      // Note: The comments on the `throw` lines are intentional, they show
+      // up in Node's output if this results in an unhandled exception.
       throw er; // Unhandled 'error' event
-    } else {
-      // At least give some kind of context to the user
-      var err = new Error('Unhandled "error" event. (' + er + ')');
-      err.context = er;
-      throw err;
     }
-    return false;
+    // At least give some kind of context to the user
+    var err = new Error('Unhandled error.' + (er ? ' (' + er.message + ')' : ''));
+    err.context = er;
+    throw err; // Unhandled 'error' event
   }
 
-  handler = events[type];
+  var handler = events[type];
 
-  if (!handler)
+  if (handler === undefined)
     return false;
 
-  var isFn = typeof handler === 'function';
-  len = arguments.length;
-  switch (len) {
-      // fast cases
-    case 1:
-      emitNone(handler, isFn, this);
-      break;
-    case 2:
-      emitOne(handler, isFn, this, arguments[1]);
-      break;
-    case 3:
-      emitTwo(handler, isFn, this, arguments[1], arguments[2]);
-      break;
-    case 4:
-      emitThree(handler, isFn, this, arguments[1], arguments[2], arguments[3]);
-      break;
-      // slower
-    default:
-      args = new Array(len - 1);
-      for (i = 1; i < len; i++)
-        args[i - 1] = arguments[i];
-      emitMany(handler, isFn, this, args);
+  if (typeof handler === 'function') {
+    ReflectApply(handler, this, args);
+  } else {
+    var len = handler.length;
+    var listeners = arrayClone(handler, len);
+    for (var i = 0; i < len; ++i)
+      ReflectApply(listeners[i], this, args);
   }
 
   return true;
@@ -206,19 +248,18 @@ function _addListener(target, type, listener, prepend) {
   var events;
   var existing;
 
-  if (typeof listener !== 'function')
-    throw new TypeError('"listener" argument must be a function');
+  checkListener(listener);
 
   events = target._events;
-  if (!events) {
-    events = target._events = objectCreate(null);
+  if (events === undefined) {
+    events = target._events = Object.create(null);
     target._eventsCount = 0;
   } else {
     // To avoid recursion in the case that type === "newListener"! Before
     // adding it to the listeners, first emit "newListener".
-    if (events.newListener) {
+    if (events.newListener !== undefined) {
       target.emit('newListener', type,
-          listener.listener ? listener.listener : listener);
+                  listener.listener ? listener.listener : listener);
 
       // Re-assign `events` because a newListener handler could have caused the
       // this._events to be assigned to a new object
@@ -227,7 +268,7 @@ function _addListener(target, type, listener, prepend) {
     existing = events[type];
   }
 
-  if (!existing) {
+  if (existing === undefined) {
     // Optimize the case of one listener. Don't need the extra array object.
     existing = events[type] = listener;
     ++target._eventsCount;
@@ -235,33 +276,29 @@ function _addListener(target, type, listener, prepend) {
     if (typeof existing === 'function') {
       // Adding the second element, need to change to array.
       existing = events[type] =
-          prepend ? [listener, existing] : [existing, listener];
-    } else {
+        prepend ? [listener, existing] : [existing, listener];
       // If we've already got an array, just append.
-      if (prepend) {
-        existing.unshift(listener);
-      } else {
-        existing.push(listener);
-      }
+    } else if (prepend) {
+      existing.unshift(listener);
+    } else {
+      existing.push(listener);
     }
 
     // Check for listener leak
-    if (!existing.warned) {
-      m = $getMaxListeners(target);
-      if (m && m > 0 && existing.length > m) {
-        existing.warned = true;
-        var w = new Error('Possible EventEmitter memory leak detected. ' +
-            existing.length + ' "' + String(type) + '" listeners ' +
-            'added. Use emitter.setMaxListeners() to ' +
-            'increase limit.');
-        w.name = 'MaxListenersExceededWarning';
-        w.emitter = target;
-        w.type = type;
-        w.count = existing.length;
-        if (typeof console === 'object' && console.warn) {
-          console.warn('%s: %s', w.name, w.message);
-        }
-      }
+    m = _getMaxListeners(target);
+    if (m > 0 && existing.length > m && !existing.warned) {
+      existing.warned = true;
+      // No error code for this since it is a Warning
+      // eslint-disable-next-line no-restricted-syntax
+      var w = new Error('Possible EventEmitter memory leak detected. ' +
+                          existing.length + ' ' + String(type) + ' listeners ' +
+                          'added. Use emitter.setMaxListeners() to ' +
+                          'increase limit');
+      w.name = 'MaxListenersExceededWarning';
+      w.emitter = target;
+      w.type = type;
+      w.count = existing.length;
+      ProcessEmitWarning(w);
     }
   }
 
@@ -283,44 +320,29 @@ function onceWrapper() {
   if (!this.fired) {
     this.target.removeListener(this.type, this.wrapFn);
     this.fired = true;
-    switch (arguments.length) {
-      case 0:
-        return this.listener.call(this.target);
-      case 1:
-        return this.listener.call(this.target, arguments[0]);
-      case 2:
-        return this.listener.call(this.target, arguments[0], arguments[1]);
-      case 3:
-        return this.listener.call(this.target, arguments[0], arguments[1],
-            arguments[2]);
-      default:
-        var args = new Array(arguments.length);
-        for (var i = 0; i < args.length; ++i)
-          args[i] = arguments[i];
-        this.listener.apply(this.target, args);
-    }
+    if (arguments.length === 0)
+      return this.listener.call(this.target);
+    return this.listener.apply(this.target, arguments);
   }
 }
 
 function _onceWrap(target, type, listener) {
   var state = { fired: false, wrapFn: undefined, target: target, type: type, listener: listener };
-  var wrapped = bind.call(onceWrapper, state);
+  var wrapped = onceWrapper.bind(state);
   wrapped.listener = listener;
   state.wrapFn = wrapped;
   return wrapped;
 }
 
 EventEmitter.prototype.once = function once(type, listener) {
-  if (typeof listener !== 'function')
-    throw new TypeError('"listener" argument must be a function');
+  checkListener(listener);
   this.on(type, _onceWrap(this, type, listener));
   return this;
 };
 
 EventEmitter.prototype.prependOnceListener =
     function prependOnceListener(type, listener) {
-      if (typeof listener !== 'function')
-        throw new TypeError('"listener" argument must be a function');
+      checkListener(listener);
       this.prependListener(type, _onceWrap(this, type, listener));
       return this;
     };
@@ -330,20 +352,19 @@ EventEmitter.prototype.removeListener =
     function removeListener(type, listener) {
       var list, events, position, i, originalListener;
 
-      if (typeof listener !== 'function')
-        throw new TypeError('"listener" argument must be a function');
+      checkListener(listener);
 
       events = this._events;
-      if (!events)
+      if (events === undefined)
         return this;
 
       list = events[type];
-      if (!list)
+      if (list === undefined)
         return this;
 
       if (list === listener || list.listener === listener) {
         if (--this._eventsCount === 0)
-          this._events = objectCreate(null);
+          this._events = Object.create(null);
         else {
           delete events[type];
           if (events.removeListener)
@@ -365,35 +386,38 @@ EventEmitter.prototype.removeListener =
 
         if (position === 0)
           list.shift();
-        else
+        else {
           spliceOne(list, position);
+        }
 
         if (list.length === 1)
           events[type] = list[0];
 
-        if (events.removeListener)
+        if (events.removeListener !== undefined)
           this.emit('removeListener', type, originalListener || listener);
       }
 
       return this;
     };
 
+EventEmitter.prototype.off = EventEmitter.prototype.removeListener;
+
 EventEmitter.prototype.removeAllListeners =
     function removeAllListeners(type) {
       var listeners, events, i;
 
       events = this._events;
-      if (!events)
+      if (events === undefined)
         return this;
 
       // not listening for removeListener, no need to emit
-      if (!events.removeListener) {
+      if (events.removeListener === undefined) {
         if (arguments.length === 0) {
-          this._events = objectCreate(null);
+          this._events = Object.create(null);
           this._eventsCount = 0;
-        } else if (events[type]) {
+        } else if (events[type] !== undefined) {
           if (--this._eventsCount === 0)
-            this._events = objectCreate(null);
+            this._events = Object.create(null);
           else
             delete events[type];
         }
@@ -402,7 +426,7 @@ EventEmitter.prototype.removeAllListeners =
 
       // emit removeListener for all listeners on all events
       if (arguments.length === 0) {
-        var keys = objectKeys(events);
+        var keys = Object.keys(events);
         var key;
         for (i = 0; i < keys.length; ++i) {
           key = keys[i];
@@ -410,7 +434,7 @@ EventEmitter.prototype.removeAllListeners =
           this.removeAllListeners(key);
         }
         this.removeAllListeners('removeListener');
-        this._events = objectCreate(null);
+        this._events = Object.create(null);
         this._eventsCount = 0;
         return this;
       }
@@ -419,7 +443,7 @@ EventEmitter.prototype.removeAllListeners =
 
       if (typeof listeners === 'function') {
         this.removeListener(type, listeners);
-      } else if (listeners) {
+      } else if (listeners !== undefined) {
         // LIFO order
         for (i = listeners.length - 1; i >= 0; i--) {
           this.removeListener(type, listeners[i]);
@@ -432,17 +456,18 @@ EventEmitter.prototype.removeAllListeners =
 function _listeners(target, type, unwrap) {
   var events = target._events;
 
-  if (!events)
+  if (events === undefined)
     return [];
 
   var evlistener = events[type];
-  if (!evlistener)
+  if (evlistener === undefined)
     return [];
 
   if (typeof evlistener === 'function')
     return unwrap ? [evlistener.listener || evlistener] : [evlistener];
 
-  return unwrap ? unwrapListeners(evlistener) : arrayClone(evlistener, evlistener.length);
+  return unwrap ?
+    unwrapListeners(evlistener) : arrayClone(evlistener, evlistener.length);
 }
 
 EventEmitter.prototype.listeners = function listeners(type) {
@@ -465,12 +490,12 @@ EventEmitter.prototype.listenerCount = listenerCount;
 function listenerCount(type) {
   var events = this._events;
 
-  if (events) {
+  if (events !== undefined) {
     var evlistener = events[type];
 
     if (typeof evlistener === 'function') {
       return 1;
-    } else if (evlistener) {
+    } else if (evlistener !== undefined) {
       return evlistener.length;
     }
   }
@@ -479,21 +504,20 @@ function listenerCount(type) {
 }
 
 EventEmitter.prototype.eventNames = function eventNames() {
-  return this._eventsCount > 0 ? Reflect.ownKeys(this._events) : [];
+  return this._eventsCount > 0 ? ReflectOwnKeys(this._events) : [];
 };
-
-// About 1.5x faster than the two-arg version of Array#splice().
-function spliceOne(list, index) {
-  for (var i = index, k = i + 1, n = list.length; k < n; i += 1, k += 1)
-    list[i] = list[k];
-  list.pop();
-}
 
 function arrayClone(arr, n) {
   var copy = new Array(n);
   for (var i = 0; i < n; ++i)
     copy[i] = arr[i];
   return copy;
+}
+
+function spliceOne(list, index) {
+  for (; index + 1 < list.length; index++)
+    list[index] = list[index + 1];
+  list.pop();
 }
 
 function unwrapListeners(arr) {
@@ -504,604 +528,588 @@ function unwrapListeners(arr) {
   return ret;
 }
 
-function objectCreatePolyfill(proto) {
-  var F = function() {};
-  F.prototype = proto;
-  return new F;
+function once(emitter, name) {
+  return new Promise(function (resolve, reject) {
+    function errorListener(err) {
+      emitter.removeListener(name, resolver);
+      reject(err);
+    }
+
+    function resolver() {
+      if (typeof emitter.removeListener === 'function') {
+        emitter.removeListener('error', errorListener);
+      }
+      resolve([].slice.call(arguments));
+    };
+
+    eventTargetAgnosticAddListener(emitter, name, resolver, { once: true });
+    if (name !== 'error') {
+      addErrorHandlerIfEventEmitter(emitter, errorListener, { once: true });
+    }
+  });
 }
-function objectKeysPolyfill(obj) {
-  var keys = [];
-  for (var k in obj) if (Object.prototype.hasOwnProperty.call(obj, k)) {
-    keys.push(k);
+
+function addErrorHandlerIfEventEmitter(emitter, handler, flags) {
+  if (typeof emitter.on === 'function') {
+    eventTargetAgnosticAddListener(emitter, 'error', handler, flags);
   }
-  return k;
-}
-function functionBindPolyfill(context) {
-  var fn = this;
-  return function () {
-    return fn.apply(context, arguments);
-  };
 }
 
-},{}],2:[function(require,module,exports){
-'use strict';
-var token = '%[a-f0-9]{2}';
-var singleMatcher = new RegExp(token, 'gi');
-var multiMatcher = new RegExp('(' + token + ')+', 'gi');
-
-function decodeComponents(components, split) {
-	try {
-		// Try to decode the entire string first
-		return decodeURIComponent(components.join(''));
-	} catch (err) {
-		// Do nothing
-	}
-
-	if (components.length === 1) {
-		return components;
-	}
-
-	split = split || 1;
-
-	// Split the array in 2 parts
-	var left = components.slice(0, split);
-	var right = components.slice(split);
-
-	return Array.prototype.concat.call([], decodeComponents(left), decodeComponents(right));
+function eventTargetAgnosticAddListener(emitter, name, listener, flags) {
+  if (typeof emitter.on === 'function') {
+    if (flags.once) {
+      emitter.once(name, listener);
+    } else {
+      emitter.on(name, listener);
+    }
+  } else if (typeof emitter.addEventListener === 'function') {
+    // EventTarget does not have `error` event semantics like Node
+    // EventEmitters, we do not listen for `error` events here.
+    emitter.addEventListener(name, function wrapListener(arg) {
+      // IE does not have builtin `{ once: true }` support so we
+      // have to do it manually.
+      if (flags.once) {
+        emitter.removeEventListener(name, wrapListener);
+      }
+      listener(arg);
+    });
+  } else {
+    throw new TypeError('The "emitter" argument must be of type EventEmitter. Received type ' + typeof emitter);
+  }
 }
-
-function decode(input) {
-	try {
-		return decodeURIComponent(input);
-	} catch (err) {
-		var tokens = input.match(singleMatcher);
-
-		for (var i = 1; i < tokens.length; i++) {
-			input = decodeComponents(tokens, i).join('');
-
-			tokens = input.match(singleMatcher);
-		}
-
-		return input;
-	}
-}
-
-function customDecodeURIComponent(input) {
-	// Keep track of all the replacements and prefill the map with the `BOM`
-	var replaceMap = {
-		'%FE%FF': '\uFFFD\uFFFD',
-		'%FF%FE': '\uFFFD\uFFFD'
-	};
-
-	var match = multiMatcher.exec(input);
-	while (match) {
-		try {
-			// Decode as big chunks as possible
-			replaceMap[match[0]] = decodeURIComponent(match[0]);
-		} catch (err) {
-			var result = decode(match[0]);
-
-			if (result !== match[0]) {
-				replaceMap[match[0]] = result;
-			}
-		}
-
-		match = multiMatcher.exec(input);
-	}
-
-	// Add `%C2` at the end of the map to make sure it does not replace the combinator before everything else
-	replaceMap['%C2'] = '\uFFFD';
-
-	var entries = Object.keys(replaceMap);
-
-	for (var i = 0; i < entries.length; i++) {
-		// Replace all decoded components
-		var key = entries[i];
-		input = input.replace(new RegExp(key, 'g'), replaceMap[key]);
-	}
-
-	return input;
-}
-
-module.exports = function (encodedURI) {
-	if (typeof encodedURI !== 'string') {
-		throw new TypeError('Expected `encodedURI` to be of type `string`, got `' + typeof encodedURI + '`');
-	}
-
-	try {
-		encodedURI = encodedURI.replace(/\+/g, ' ');
-
-		// Try the built in decoder first
-		return decodeURIComponent(encodedURI);
-	} catch (err) {
-		// Fallback to a more advanced decoder
-		return customDecodeURIComponent(encodedURI);
-	}
-};
 
 },{}],3:[function(require,module,exports){
-'use strict';
-module.exports = function (obj, predicate) {
-	var ret = {};
-	var keys = Object.keys(obj);
-	var isArr = Array.isArray(predicate);
+"use strict";
 
-	for (var i = 0; i < keys.length; i++) {
-		var key = keys[i];
-		var val = obj[key];
-
-		if (isArr ? predicate.indexOf(key) !== -1 : predicate(key, val, obj)) {
-			ret[key] = val;
-		}
-	}
-
-	return ret;
-};
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.excludeKeys = excludeKeys;
+exports.includeKeys = includeKeys;
+function includeKeys(object, predicate) {
+  const result = {};
+  if (Array.isArray(predicate)) {
+    for (const key of predicate) {
+      const descriptor = Object.getOwnPropertyDescriptor(object, key);
+      if (descriptor?.enumerable) {
+        Object.defineProperty(result, key, descriptor);
+      }
+    }
+  } else {
+    // `Reflect.ownKeys()` is required to retrieve symbol properties
+    for (const key of Reflect.ownKeys(object)) {
+      const descriptor = Object.getOwnPropertyDescriptor(object, key);
+      if (descriptor.enumerable) {
+        const value = object[key];
+        if (predicate(key, value, object)) {
+          Object.defineProperty(result, key, descriptor);
+        }
+      }
+    }
+  }
+  return result;
+}
+function excludeKeys(object, predicate) {
+  if (Array.isArray(predicate)) {
+    const set = new Set(predicate);
+    return includeKeys(object, key => !set.has(key));
+  }
+  return includeKeys(object, (key, value, object) => !predicate(key, value, object));
+}
 
 },{}],4:[function(require,module,exports){
-'use strict';
-const strictUriEncode = require('strict-uri-encode');
-const decodeComponent = require('decode-uri-component');
-const splitOnFirst = require('split-on-first');
-const filterObject = require('filter-obj');
+"use strict";
 
-const isNullOrUndefined = value => value === null || value === undefined;
-
-function encoderForArrayFormat(options) {
-	switch (options.arrayFormat) {
-		case 'index':
-			return key => (result, value) => {
-				const index = result.length;
-
-				if (
-					value === undefined ||
-					(options.skipNull && value === null) ||
-					(options.skipEmptyString && value === '')
-				) {
-					return result;
-				}
-
-				if (value === null) {
-					return [...result, [encode(key, options), '[', index, ']'].join('')];
-				}
-
-				return [
-					...result,
-					[encode(key, options), '[', encode(index, options), ']=', encode(value, options)].join('')
-				];
-			};
-
-		case 'bracket':
-			return key => (result, value) => {
-				if (
-					value === undefined ||
-					(options.skipNull && value === null) ||
-					(options.skipEmptyString && value === '')
-				) {
-					return result;
-				}
-
-				if (value === null) {
-					return [...result, [encode(key, options), '[]'].join('')];
-				}
-
-				return [...result, [encode(key, options), '[]=', encode(value, options)].join('')];
-			};
-
-		case 'comma':
-		case 'separator':
-			return key => (result, value) => {
-				if (value === null || value === undefined || value.length === 0) {
-					return result;
-				}
-
-				if (result.length === 0) {
-					return [[encode(key, options), '=', encode(value, options)].join('')];
-				}
-
-				return [[result, encode(value, options)].join(options.arrayFormatSeparator)];
-			};
-
-		default:
-			return key => (result, value) => {
-				if (
-					value === undefined ||
-					(options.skipNull && value === null) ||
-					(options.skipEmptyString && value === '')
-				) {
-					return result;
-				}
-
-				if (value === null) {
-					return [...result, encode(key, options)];
-				}
-
-				return [...result, [encode(key, options), '=', encode(value, options)].join('')];
-			};
-	}
-}
-
-function parserForArrayFormat(options) {
-	let result;
-
-	switch (options.arrayFormat) {
-		case 'index':
-			return (key, value, accumulator) => {
-				result = /\[(\d*)\]$/.exec(key);
-
-				key = key.replace(/\[\d*\]$/, '');
-
-				if (!result) {
-					accumulator[key] = value;
-					return;
-				}
-
-				if (accumulator[key] === undefined) {
-					accumulator[key] = {};
-				}
-
-				accumulator[key][result[1]] = value;
-			};
-
-		case 'bracket':
-			return (key, value, accumulator) => {
-				result = /(\[\])$/.exec(key);
-				key = key.replace(/\[\]$/, '');
-
-				if (!result) {
-					accumulator[key] = value;
-					return;
-				}
-
-				if (accumulator[key] === undefined) {
-					accumulator[key] = [value];
-					return;
-				}
-
-				accumulator[key] = [].concat(accumulator[key], value);
-			};
-
-		case 'comma':
-		case 'separator':
-			return (key, value, accumulator) => {
-				const isArray = typeof value === 'string' && value.includes(options.arrayFormatSeparator);
-				const isEncodedArray = (typeof value === 'string' && !isArray && decode(value, options).includes(options.arrayFormatSeparator));
-				value = isEncodedArray ? decode(value, options) : value;
-				const newValue = isArray || isEncodedArray ? value.split(options.arrayFormatSeparator).map(item => decode(item, options)) : value === null ? value : decode(value, options);
-				accumulator[key] = newValue;
-			};
-
-		default:
-			return (key, value, accumulator) => {
-				if (accumulator[key] === undefined) {
-					accumulator[key] = value;
-					return;
-				}
-
-				accumulator[key] = [].concat(accumulator[key], value);
-			};
-	}
-}
-
-function validateArrayFormatSeparator(value) {
-	if (typeof value !== 'string' || value.length !== 1) {
-		throw new TypeError('arrayFormatSeparator must be single character string');
-	}
-}
-
-function encode(value, options) {
-	if (options.encode) {
-		return options.strict ? strictUriEncode(value) : encodeURIComponent(value);
-	}
-
-	return value;
-}
-
-function decode(value, options) {
-	if (options.decode) {
-		return decodeComponent(value);
-	}
-
-	return value;
-}
-
-function keysSorter(input) {
-	if (Array.isArray(input)) {
-		return input.sort();
-	}
-
-	if (typeof input === 'object') {
-		return keysSorter(Object.keys(input))
-			.sort((a, b) => Number(a) - Number(b))
-			.map(key => input[key]);
-	}
-
-	return input;
-}
-
-function removeHash(input) {
-	const hashStart = input.indexOf('#');
-	if (hashStart !== -1) {
-		input = input.slice(0, hashStart);
-	}
-
-	return input;
-}
-
-function getHash(url) {
-	let hash = '';
-	const hashStart = url.indexOf('#');
-	if (hashStart !== -1) {
-		hash = url.slice(hashStart);
-	}
-
-	return hash;
-}
-
-function extract(input) {
-	input = removeHash(input);
-	const queryStart = input.indexOf('?');
-	if (queryStart === -1) {
-		return '';
-	}
-
-	return input.slice(queryStart + 1);
-}
-
-function parseValue(value, options) {
-	if (options.parseNumbers && !Number.isNaN(Number(value)) && (typeof value === 'string' && value.trim() !== '')) {
-		value = Number(value);
-	} else if (options.parseBooleans && value !== null && (value.toLowerCase() === 'true' || value.toLowerCase() === 'false')) {
-		value = value.toLowerCase() === 'true';
-	}
-
-	return value;
-}
-
-function parse(query, options) {
-	options = Object.assign({
-		decode: true,
-		sort: true,
-		arrayFormat: 'none',
-		arrayFormatSeparator: ',',
-		parseNumbers: false,
-		parseBooleans: false
-	}, options);
-
-	validateArrayFormatSeparator(options.arrayFormatSeparator);
-
-	const formatter = parserForArrayFormat(options);
-
-	// Create an object with no prototype
-	const ret = Object.create(null);
-
-	if (typeof query !== 'string') {
-		return ret;
-	}
-
-	query = query.trim().replace(/^[?#&]/, '');
-
-	if (!query) {
-		return ret;
-	}
-
-	for (const param of query.split('&')) {
-		if (param === '') {
-			continue;
-		}
-
-		let [key, value] = splitOnFirst(options.decode ? param.replace(/\+/g, ' ') : param, '=');
-
-		// Missing `=` should be `null`:
-		// http://w3.org/TR/2012/WD-url-20120524/#collect-url-parameters
-		value = value === undefined ? null : ['comma', 'separator'].includes(options.arrayFormat) ? value : decode(value, options);
-		formatter(decode(key, options), value, ret);
-	}
-
-	for (const key of Object.keys(ret)) {
-		const value = ret[key];
-		if (typeof value === 'object' && value !== null) {
-			for (const k of Object.keys(value)) {
-				value[k] = parseValue(value[k], options);
-			}
-		} else {
-			ret[key] = parseValue(value, options);
-		}
-	}
-
-	if (options.sort === false) {
-		return ret;
-	}
-
-	return (options.sort === true ? Object.keys(ret).sort() : Object.keys(ret).sort(options.sort)).reduce((result, key) => {
-		const value = ret[key];
-		if (Boolean(value) && typeof value === 'object' && !Array.isArray(value)) {
-			// Sort object keys, not values
-			result[key] = keysSorter(value);
-		} else {
-			result[key] = value;
-		}
-
-		return result;
-	}, Object.create(null));
-}
-
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.exclude = exclude;
 exports.extract = extract;
 exports.parse = parse;
+exports.parseUrl = parseUrl;
+exports.pick = pick;
+exports.stringify = stringify;
+exports.stringifyUrl = stringifyUrl;
+var _decodeUriComponent = _interopRequireDefault(require("decode-uri-component"));
+var _splitOnFirst = _interopRequireDefault(require("split-on-first"));
+var _filterObj = require("filter-obj");
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+const isNullOrUndefined = value => value === null || value === undefined;
 
-exports.stringify = (object, options) => {
-	if (!object) {
-		return '';
-	}
+// eslint-disable-next-line unicorn/prefer-code-point
+const strictUriEncode = string => encodeURIComponent(string).replace(/[!'()*]/g, x => `%${x.charCodeAt(0).toString(16).toUpperCase()}`);
+const encodeFragmentIdentifier = Symbol('encodeFragmentIdentifier');
+function encoderForArrayFormat(options) {
+  switch (options.arrayFormat) {
+    case 'index':
+      {
+        return key => (result, value) => {
+          const index = result.length;
+          if (value === undefined || options.skipNull && value === null || options.skipEmptyString && value === '') {
+            return result;
+          }
+          if (value === null) {
+            return [...result, [encode(key, options), '[', index, ']'].join('')];
+          }
+          return [...result, [encode(key, options), '[', encode(index, options), ']=', encode(value, options)].join('')];
+        };
+      }
+    case 'bracket':
+      {
+        return key => (result, value) => {
+          if (value === undefined || options.skipNull && value === null || options.skipEmptyString && value === '') {
+            return result;
+          }
+          if (value === null) {
+            return [...result, [encode(key, options), '[]'].join('')];
+          }
+          return [...result, [encode(key, options), '[]=', encode(value, options)].join('')];
+        };
+      }
+    case 'colon-list-separator':
+      {
+        return key => (result, value) => {
+          if (value === undefined || options.skipNull && value === null || options.skipEmptyString && value === '') {
+            return result;
+          }
+          if (value === null) {
+            return [...result, [encode(key, options), ':list='].join('')];
+          }
+          return [...result, [encode(key, options), ':list=', encode(value, options)].join('')];
+        };
+      }
+    case 'comma':
+    case 'separator':
+    case 'bracket-separator':
+      {
+        const keyValueSep = options.arrayFormat === 'bracket-separator' ? '[]=' : '=';
+        return key => (result, value) => {
+          if (value === undefined || options.skipNull && value === null || options.skipEmptyString && value === '') {
+            return result;
+          }
 
-	options = Object.assign({
-		encode: true,
-		strict: true,
-		arrayFormat: 'none',
-		arrayFormatSeparator: ','
-	}, options);
+          // Translate null to an empty string so that it doesn't serialize as 'null'
+          value = value === null ? '' : value;
+          if (result.length === 0) {
+            return [[encode(key, options), keyValueSep, encode(value, options)].join('')];
+          }
+          return [[result, encode(value, options)].join(options.arrayFormatSeparator)];
+        };
+      }
+    default:
+      {
+        return key => (result, value) => {
+          if (value === undefined || options.skipNull && value === null || options.skipEmptyString && value === '') {
+            return result;
+          }
+          if (value === null) {
+            return [...result, encode(key, options)];
+          }
+          return [...result, [encode(key, options), '=', encode(value, options)].join('')];
+        };
+      }
+  }
+}
+function parserForArrayFormat(options) {
+  let result;
+  switch (options.arrayFormat) {
+    case 'index':
+      {
+        return (key, value, accumulator) => {
+          result = /\[(\d*)]$/.exec(key);
+          key = key.replace(/\[\d*]$/, '');
+          if (!result) {
+            accumulator[key] = value;
+            return;
+          }
+          if (accumulator[key] === undefined) {
+            accumulator[key] = {};
+          }
+          accumulator[key][result[1]] = value;
+        };
+      }
+    case 'bracket':
+      {
+        return (key, value, accumulator) => {
+          result = /(\[])$/.exec(key);
+          key = key.replace(/\[]$/, '');
+          if (!result) {
+            accumulator[key] = value;
+            return;
+          }
+          if (accumulator[key] === undefined) {
+            accumulator[key] = [value];
+            return;
+          }
+          accumulator[key] = [...accumulator[key], value];
+        };
+      }
+    case 'colon-list-separator':
+      {
+        return (key, value, accumulator) => {
+          result = /(:list)$/.exec(key);
+          key = key.replace(/:list$/, '');
+          if (!result) {
+            accumulator[key] = value;
+            return;
+          }
+          if (accumulator[key] === undefined) {
+            accumulator[key] = [value];
+            return;
+          }
+          accumulator[key] = [...accumulator[key], value];
+        };
+      }
+    case 'comma':
+    case 'separator':
+      {
+        return (key, value, accumulator) => {
+          const isArray = typeof value === 'string' && value.includes(options.arrayFormatSeparator);
+          const isEncodedArray = typeof value === 'string' && !isArray && decode(value, options).includes(options.arrayFormatSeparator);
+          value = isEncodedArray ? decode(value, options) : value;
+          const newValue = isArray || isEncodedArray ? value.split(options.arrayFormatSeparator).map(item => decode(item, options)) : value === null ? value : decode(value, options);
+          accumulator[key] = newValue;
+        };
+      }
+    case 'bracket-separator':
+      {
+        return (key, value, accumulator) => {
+          const isArray = /(\[])$/.test(key);
+          key = key.replace(/\[]$/, '');
+          if (!isArray) {
+            accumulator[key] = value ? decode(value, options) : value;
+            return;
+          }
+          const arrayValue = value === null ? [] : value.split(options.arrayFormatSeparator).map(item => decode(item, options));
+          if (accumulator[key] === undefined) {
+            accumulator[key] = arrayValue;
+            return;
+          }
+          accumulator[key] = [...accumulator[key], ...arrayValue];
+        };
+      }
+    default:
+      {
+        return (key, value, accumulator) => {
+          if (accumulator[key] === undefined) {
+            accumulator[key] = value;
+            return;
+          }
+          accumulator[key] = [...[accumulator[key]].flat(), value];
+        };
+      }
+  }
+}
+function validateArrayFormatSeparator(value) {
+  if (typeof value !== 'string' || value.length !== 1) {
+    throw new TypeError('arrayFormatSeparator must be single character string');
+  }
+}
+function encode(value, options) {
+  if (options.encode) {
+    return options.strict ? strictUriEncode(value) : encodeURIComponent(value);
+  }
+  return value;
+}
+function decode(value, options) {
+  if (options.decode) {
+    return (0, _decodeUriComponent.default)(value);
+  }
+  return value;
+}
+function keysSorter(input) {
+  if (Array.isArray(input)) {
+    return input.sort();
+  }
+  if (typeof input === 'object') {
+    return keysSorter(Object.keys(input)).sort((a, b) => Number(a) - Number(b)).map(key => input[key]);
+  }
+  return input;
+}
+function removeHash(input) {
+  const hashStart = input.indexOf('#');
+  if (hashStart !== -1) {
+    input = input.slice(0, hashStart);
+  }
+  return input;
+}
+function getHash(url) {
+  let hash = '';
+  const hashStart = url.indexOf('#');
+  if (hashStart !== -1) {
+    hash = url.slice(hashStart);
+  }
+  return hash;
+}
+function parseValue(value, options) {
+  if (options.parseNumbers && !Number.isNaN(Number(value)) && typeof value === 'string' && value.trim() !== '') {
+    value = Number(value);
+  } else if (options.parseBooleans && value !== null && (value.toLowerCase() === 'true' || value.toLowerCase() === 'false')) {
+    value = value.toLowerCase() === 'true';
+  }
+  return value;
+}
+function extract(input) {
+  input = removeHash(input);
+  const queryStart = input.indexOf('?');
+  if (queryStart === -1) {
+    return '';
+  }
+  return input.slice(queryStart + 1);
+}
+function parse(query, options) {
+  options = {
+    decode: true,
+    sort: true,
+    arrayFormat: 'none',
+    arrayFormatSeparator: ',',
+    parseNumbers: false,
+    parseBooleans: false,
+    ...options
+  };
+  validateArrayFormatSeparator(options.arrayFormatSeparator);
+  const formatter = parserForArrayFormat(options);
 
-	validateArrayFormatSeparator(options.arrayFormatSeparator);
+  // Create an object with no prototype
+  const returnValue = Object.create(null);
+  if (typeof query !== 'string') {
+    return returnValue;
+  }
+  query = query.trim().replace(/^[?#&]/, '');
+  if (!query) {
+    return returnValue;
+  }
+  for (const parameter of query.split('&')) {
+    if (parameter === '') {
+      continue;
+    }
+    const parameter_ = options.decode ? parameter.replace(/\+/g, ' ') : parameter;
+    let [key, value] = (0, _splitOnFirst.default)(parameter_, '=');
+    if (key === undefined) {
+      key = parameter_;
+    }
 
-	const shouldFilter = key => (
-		(options.skipNull && isNullOrUndefined(object[key])) ||
-		(options.skipEmptyString && object[key] === '')
-	);
+    // Missing `=` should be `null`:
+    // http://w3.org/TR/2012/WD-url-20120524/#collect-url-parameters
+    value = value === undefined ? null : ['comma', 'separator', 'bracket-separator'].includes(options.arrayFormat) ? value : decode(value, options);
+    formatter(decode(key, options), value, returnValue);
+  }
+  for (const [key, value] of Object.entries(returnValue)) {
+    if (typeof value === 'object' && value !== null) {
+      for (const [key2, value2] of Object.entries(value)) {
+        value[key2] = parseValue(value2, options);
+      }
+    } else {
+      returnValue[key] = parseValue(value, options);
+    }
+  }
+  if (options.sort === false) {
+    return returnValue;
+  }
 
-	const formatter = encoderForArrayFormat(options);
+  // TODO: Remove the use of `reduce`.
+  // eslint-disable-next-line unicorn/no-array-reduce
+  return (options.sort === true ? Object.keys(returnValue).sort() : Object.keys(returnValue).sort(options.sort)).reduce((result, key) => {
+    const value = returnValue[key];
+    if (Boolean(value) && typeof value === 'object' && !Array.isArray(value)) {
+      // Sort object keys, not values
+      result[key] = keysSorter(value);
+    } else {
+      result[key] = value;
+    }
+    return result;
+  }, Object.create(null));
+}
+function stringify(object, options) {
+  if (!object) {
+    return '';
+  }
+  options = {
+    encode: true,
+    strict: true,
+    arrayFormat: 'none',
+    arrayFormatSeparator: ',',
+    ...options
+  };
+  validateArrayFormatSeparator(options.arrayFormatSeparator);
+  const shouldFilter = key => options.skipNull && isNullOrUndefined(object[key]) || options.skipEmptyString && object[key] === '';
+  const formatter = encoderForArrayFormat(options);
+  const objectCopy = {};
+  for (const [key, value] of Object.entries(object)) {
+    if (!shouldFilter(key)) {
+      objectCopy[key] = value;
+    }
+  }
+  const keys = Object.keys(objectCopy);
+  if (options.sort !== false) {
+    keys.sort(options.sort);
+  }
+  return keys.map(key => {
+    const value = object[key];
+    if (value === undefined) {
+      return '';
+    }
+    if (value === null) {
+      return encode(key, options);
+    }
+    if (Array.isArray(value)) {
+      if (value.length === 0 && options.arrayFormat === 'bracket-separator') {
+        return encode(key, options) + '[]';
+      }
+      return value.reduce(formatter(key), []).join('&');
+    }
+    return encode(key, options) + '=' + encode(value, options);
+  }).filter(x => x.length > 0).join('&');
+}
+function parseUrl(url, options) {
+  options = {
+    decode: true,
+    ...options
+  };
+  let [url_, hash] = (0, _splitOnFirst.default)(url, '#');
+  if (url_ === undefined) {
+    url_ = url;
+  }
+  return {
+    url: url_?.split('?')?.[0] ?? '',
+    query: parse(extract(url), options),
+    ...(options && options.parseFragmentIdentifier && hash ? {
+      fragmentIdentifier: decode(hash, options)
+    } : {})
+  };
+}
+function stringifyUrl(object, options) {
+  options = {
+    encode: true,
+    strict: true,
+    [encodeFragmentIdentifier]: true,
+    ...options
+  };
+  const url = removeHash(object.url).split('?')[0] || '';
+  const queryFromUrl = extract(object.url);
+  const query = {
+    ...parse(queryFromUrl, {
+      sort: false
+    }),
+    ...object.query
+  };
+  let queryString = stringify(query, options);
+  if (queryString) {
+    queryString = `?${queryString}`;
+  }
+  let hash = getHash(object.url);
+  if (object.fragmentIdentifier) {
+    const urlObjectForFragmentEncode = new URL(url);
+    urlObjectForFragmentEncode.hash = object.fragmentIdentifier;
+    hash = options[encodeFragmentIdentifier] ? urlObjectForFragmentEncode.hash : `#${object.fragmentIdentifier}`;
+  }
+  return `${url}${queryString}${hash}`;
+}
+function pick(input, filter, options) {
+  options = {
+    parseFragmentIdentifier: true,
+    [encodeFragmentIdentifier]: false,
+    ...options
+  };
+  const {
+    url,
+    query,
+    fragmentIdentifier
+  } = parseUrl(input, options);
+  return stringifyUrl({
+    url,
+    query: (0, _filterObj.includeKeys)(query, filter),
+    fragmentIdentifier
+  }, options);
+}
+function exclude(input, filter, options) {
+  const exclusionFilter = Array.isArray(filter) ? key => !filter.includes(key) : (key, value) => !filter(key, value);
+  return pick(input, exclusionFilter, options);
+}
 
-	const objectCopy = {};
+},{"decode-uri-component":1,"filter-obj":3,"split-on-first":6}],5:[function(require,module,exports){
+"use strict";
 
-	for (const key of Object.keys(object)) {
-		if (!shouldFilter(key)) {
-			objectCopy[key] = object[key];
-		}
-	}
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+var queryString = _interopRequireWildcard(require("./base.js"));
+function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
+function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+var _default = queryString;
+exports.default = _default;
 
-	const keys = Object.keys(objectCopy);
+},{"./base.js":4}],6:[function(require,module,exports){
+"use strict";
 
-	if (options.sort !== false) {
-		keys.sort(options.sort);
-	}
-
-	return keys.map(key => {
-		const value = object[key];
-
-		if (value === undefined) {
-			return '';
-		}
-
-		if (value === null) {
-			return encode(key, options);
-		}
-
-		if (Array.isArray(value)) {
-			return value
-				.reduce(formatter(key), [])
-				.join('&');
-		}
-
-		return encode(key, options) + '=' + encode(value, options);
-	}).filter(x => x.length > 0).join('&');
-};
-
-exports.parseUrl = (url, options) => {
-	options = Object.assign({
-		decode: true
-	}, options);
-
-	const [url_, hash] = splitOnFirst(url, '#');
-
-	return Object.assign(
-		{
-			url: url_.split('?')[0] || '',
-			query: parse(extract(url), options)
-		},
-		options && options.parseFragmentIdentifier && hash ? {fragmentIdentifier: decode(hash, options)} : {}
-	);
-};
-
-exports.stringifyUrl = (object, options) => {
-	options = Object.assign({
-		encode: true,
-		strict: true
-	}, options);
-
-	const url = removeHash(object.url).split('?')[0] || '';
-	const queryFromUrl = exports.extract(object.url);
-	const parsedQueryFromUrl = exports.parse(queryFromUrl, {sort: false});
-
-	const query = Object.assign(parsedQueryFromUrl, object.query);
-	let queryString = exports.stringify(query, options);
-	if (queryString) {
-		queryString = `?${queryString}`;
-	}
-
-	let hash = getHash(object.url);
-	if (object.fragmentIdentifier) {
-		hash = `#${encode(object.fragmentIdentifier, options)}`;
-	}
-
-	return `${url}${queryString}${hash}`;
-};
-
-exports.pick = (input, filter, options) => {
-	options = Object.assign({
-		parseFragmentIdentifier: true
-	}, options);
-
-	const {url, query, fragmentIdentifier} = exports.parseUrl(input, options);
-	return exports.stringifyUrl({
-		url,
-		query: filterObject(query, filter),
-		fragmentIdentifier
-	}, options);
-};
-
-exports.exclude = (input, filter, options) => {
-	const exclusionFilter = Array.isArray(filter) ? key => !filter.includes(key) : (key, value) => !filter(key, value);
-
-	return exports.pick(input, exclusionFilter, options);
-};
-
-},{"decode-uri-component":2,"filter-obj":3,"split-on-first":5,"strict-uri-encode":6}],5:[function(require,module,exports){
-'use strict';
-
-module.exports = (string, separator) => {
-	if (!(typeof string === 'string' && typeof separator === 'string')) {
-		throw new TypeError('Expected the arguments to be of type `string`');
-	}
-
-	if (separator === '') {
-		return [string];
-	}
-
-	const separatorIndex = string.indexOf(separator);
-
-	if (separatorIndex === -1) {
-		return [string];
-	}
-
-	return [
-		string.slice(0, separatorIndex),
-		string.slice(separatorIndex + separator.length)
-	];
-};
-
-},{}],6:[function(require,module,exports){
-'use strict';
-module.exports = str => encodeURIComponent(str).replace(/[!'()*]/g, x => `%${x.charCodeAt(0).toString(16).toUpperCase()}`);
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = splitOnFirst;
+function splitOnFirst(string, separator) {
+  if (!(typeof string === 'string' && typeof separator === 'string')) {
+    throw new TypeError('Expected the arguments to be of type `string`');
+  }
+  if (string === '' || separator === '') {
+    return [];
+  }
+  const separatorIndex = string.indexOf(separator);
+  if (separatorIndex === -1) {
+    return [];
+  }
+  return [string.slice(0, separatorIndex), string.slice(separatorIndex + separator.length)];
+}
 
 },{}],7:[function(require,module,exports){
 module.exports={
+  "private": true,
   "name": "@transak/transak-sdk",
   "version": "1.3.0",
   "description": "Transak SDK that allows you to easily integrate the fiat on/ramp",
   "main": "dist/sdk.js",
   "scripts": {
+    "eslint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "eslint:fix": "yarn eslint --fix",
     "build": "browserify ./src/index.js -o ./dist/sdk.js -p esmify -s TransakSDK"
   },
   "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Transak/transak-sdk.git"
+    "url": "https://github.com/Transak/transak-sdk"
   },
-  "keywords": [
-    "fiat",
-    "ramp",
-    "on",
-    "off",
-    "cryptocurrency"
-  ],
+  "engines": {
+    "node": ">=10.0.0"
+  },
   "author": "Transak",
   "license": "ISC",
+  "keywords": [
+    "crypto",
+    "cryptocurrency",
+    "fiat",
+    "on",
+    "off",
+    "ramp"
+  ],
   "dependencies": {
-    "events": "^3.1.0",
-    "query-string": "^6.12.1",
-    "request": "^2.88.2"
+    "events": "^3.3.0",
+    "query-string": "^8.1.0"
   },
   "devDependencies": {
-    "browserify": "^16.5.0",
-    "esmify": "^2.1.1"
+    "@typescript-eslint/eslint-plugin": "^6.7.0",
+    "@typescript-eslint/parser": "^6.7.0",
+    "browserify": "^17.0.0",
+    "eslint": "^8.49.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-airbnb-typescript": "^17.1.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-eslint-comments": "^3.2.0",
+    "eslint-plugin-import": "^2.28.1",
+    "eslint-plugin-no-relative-import-paths": "^1.5.2",
+    "eslint-plugin-prettier": "^5.0.0",
+    "eslint-plugin-promise": "^6.1.1",
+    "eslint-plugin-testing-library": "^6.0.1",
+    "eslint-plugin-vitest": "^0.3.1",
+    "esmify": "^2.1.1",
+    "typescript": "^5.2.2"
   },
   "browserslist": {
     "production": [
@@ -1124,7 +1132,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.getCSS = getCSS;
-
 function getCSS(themeColor, height, width) {
   return `
 /* Modal Content/Box */
@@ -1305,7 +1312,8 @@ var _default = {
   TRANSAK_ORDER_CREATED: 'TRANSAK_ORDER_CREATED',
   TRANSAK_ORDER_CANCELLED: 'TRANSAK_ORDER_CANCELLED',
   TRANSAK_ORDER_FAILED: 'TRANSAK_ORDER_FAILED',
-  TRANSAK_ORDER_SUCCESSFUL: 'TRANSAK_ORDER_SUCCESSFUL'
+  TRANSAK_ORDER_SUCCESSFUL: 'TRANSAK_ORDER_SUCCESSFUL',
+  TRANSAK_WALLET_REDIRECTION: 'TRANSAK_WALLET_REDIRECTION'
 };
 exports.default = _default;
 
@@ -1365,13 +1373,9 @@ Object.defineProperty(exports, "errorsLang", {
     return _errors.default;
   }
 });
-
 var _globalConfig = _interopRequireDefault(require("./globalConfig"));
-
 var _errors = _interopRequireDefault(require("./errors"));
-
 var _events = _interopRequireDefault(require("./events"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 },{"./errors":10,"./events":11,"./globalConfig":12}],14:[function(require,module,exports){
@@ -1381,23 +1385,14 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
-
 var _events = _interopRequireDefault(require("events"));
-
 var _queryString = _interopRequireDefault(require("query-string"));
-
 var _constants = require("./constants");
-
 var _svg = require("./assets/svg");
-
 var _css = require("./assets/css");
-
 var _package = require("../package.json");
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 const eventEmitter = new _events.default.EventEmitter();
-
 function TransakSDK(partnerData) {
   this.sdkVersion = _package.version;
   this.partnerData = partnerData;
@@ -1406,32 +1401,26 @@ function TransakSDK(partnerData) {
   this.ALL_EVENTS = '*';
   this.ERROR = 'TRANSAK_ERROR';
 }
-
 TransakSDK.prototype.on = function (type, cb) {
   if (type === this.ALL_EVENTS) {
     for (let eventName in _constants.EVENTS) {
       eventEmitter.on(_constants.EVENTS[eventName], cb);
     }
   }
-
   if (_constants.EVENTS[type]) eventEmitter.on(type, cb);
   if (type === this.ERROR) eventEmitter.on(this.ERROR, cb);
 };
-
 TransakSDK.prototype.init = function () {
   this.modal(this);
 };
-
 TransakSDK.prototype.close = async function () {
   let modal = document.getElementById('transakFiatOnOffRamp');
-
   if (modal && modal.style) {
     modal.style.display = 'none';
     modal.innerHTML = '';
     await modal.remove();
   }
 };
-
 TransakSDK.prototype.closeRequest = function () {
   let iframeEl = document.getElementById('transakOnOffRampWidget');
   if (iframeEl) iframeEl.contentWindow.postMessage({
@@ -1439,7 +1428,6 @@ TransakSDK.prototype.closeRequest = function () {
     data: true
   }, '*');
 };
-
 TransakSDK.prototype.modal = async function () {
   try {
     if (this.partnerData) {
@@ -1448,20 +1436,32 @@ TransakSDK.prototype.modal = async function () {
         width,
         height,
         partnerData
-      } = await generateURL({ ...this.partnerData,
+      } = await generateURL({
+        ...this.partnerData,
         sdkVersion: this.sdkVersion
       });
       let wrapper = document.createElement('div');
       wrapper.id = 'transakFiatOnOffRamp';
-      wrapper.innerHTML = `<div class="transak_modal-overlay" id="transak_modal-overlay"></div><div class="transak_modal" id="transak_modal"><div class="transak_modal-content"><span class="transak_close">${_svg.closeSVGIcon}</span><div class="transakContainer"><iframe id="transakOnOffRampWidget" allow="camera;microphone;fullscreen;payment" allowFullScreen src="${url}" style="width: ${width}; height: ${height}"></iframe></div></div></div>`;
+      wrapper.innerHTML = `
+        <div class="transak_modal-overlay" id="transak_modal-overlay"></div>
+        <div class="transak_modal" id="transak_modal">
+          <div class="transak_modal-content">
+            <span class="transak_close">${_svg.closeSVGIcon}</span>
+            <div class="transakContainer">
+              <iframe id="transakOnOffRampWidget" allow="camera;microphone;fullscreen;payment" allowFullScreen src="${url}" style="width: ${width}; height: ${height}"></iframe>
+            </div>
+          </div>
+        </div>
+      `;
       let container = document.getElementsByTagName('body');
       if (!container) container = document.getElementsByTagName('html');
       if (!container) container = document.getElementsByTagName('div');
       await container[0].appendChild(wrapper);
       await setStyle(this.partnerData.themeColor, width, height);
       let modal = document.getElementById('transakFiatOnOffRamp');
-      let span = document.getElementsByClassName('transak_close')[0]; //Prevent background scrolling when overlay appears
+      let span = document.getElementsByClassName('transak_close')[0];
 
+      //Prevent background scrolling when overlay appears
       document.documentElement.style.overflow = 'hidden';
       document.body.scroll = 'no';
       if (modal && modal.style) modal.style.display = 'block';
@@ -1469,39 +1469,34 @@ TransakSDK.prototype.modal = async function () {
       eventEmitter.emit(_constants.EVENTS.TRANSAK_WIDGET_INITIALISED, {
         status: true,
         eventName: _constants.EVENTS.TRANSAK_WIDGET_INITIALISED
-      }); // When the user clicks on <span> (x), close the modal
+      });
 
+      // When the user clicks on <span> (x), close the modal
       span.onclick = () => {
         return this.closeRequest();
-      }; // When the user clicks anywhere outside of the modal, close it
+      };
 
-
+      // When the user clicks anywhere outside the modal, close it
       window.onclick = event => {
         if (event.target === document.getElementById('transak_modal-overlay')) this.closeRequest();
       };
-
       if (window.addEventListener) window.addEventListener('message', handleMessage);else window.attachEvent('onmessage', handleMessage);
     }
   } catch (e) {
     throw e;
   }
 };
-
 async function generateURL(configData) {
   let partnerData = {},
-      environment = 'development',
-      queryString = '',
-      width = '100%',
-      height = '100%';
-
+    environment = 'development',
+    queryString = '',
+    width = '100%',
+    height = '100%';
   if (configData) {
-    configData.hostURL = window.location.origin;
-
     if (configData.apiKey) {
       if (configData.environment) {
         if (_constants.config.ENVIRONMENT[configData.environment]) environment = _constants.config.ENVIRONMENT[configData.environment].NAME;
       }
-
       try {
         environment = environment.toUpperCase();
         Object.keys(configData).map(key => {
@@ -1516,11 +1511,9 @@ async function generateURL(configData) {
         throw e;
       }
     } else throw _constants.errorsLang.ENTER_API_KEY;
-
     if (configData.widgetWidth) width = configData.widgetWidth;
     if (configData.widgetHeight) height = configData.widgetHeight;
   }
-
   return {
     width,
     height,
@@ -1528,18 +1521,15 @@ async function generateURL(configData) {
     url: `${_constants.config.ENVIRONMENT[environment].FRONTEND}?${queryString}`
   };
 }
-
 async function setStyle(themeColor, width, height) {
   let style = await document.createElement('style');
   style.innerHTML = (0, _css.getCSS)(themeColor, height, width);
   let modal = document.getElementById('transakFiatOnOffRamp');
   if (modal) await modal.appendChild(style);
 }
-
 function handleMessage(event) {
   let environment;
   if (event.origin === _constants.config.ENVIRONMENT.LOCAL_DEVELOPMENT.FRONTEND) environment = _constants.config.ENVIRONMENT.LOCAL_DEVELOPMENT.NAME;else if (event.origin === _constants.config.ENVIRONMENT.PRODUCTION.FRONTEND) environment = _constants.config.ENVIRONMENT.PRODUCTION.NAME;else if (event.origin === _constants.config.ENVIRONMENT.STAGING.FRONTEND) environment = _constants.config.ENVIRONMENT.STAGING.NAME;
-
   if (environment) {
     if (event && event.data && event.data.event_id) {
       switch (event.data.event_id) {
@@ -1548,21 +1538,19 @@ function handleMessage(event) {
             eventEmitter.emit(_constants.EVENTS.TRANSAK_WIDGET_CLOSE, {
               status: true,
               eventName: _constants.EVENTS.TRANSAK_WIDGET_CLOSE
-            }); //enable background scrolling when overlay appears
+            });
 
+            //enable background scrolling when overlay appears
             document.documentElement.style.overflow = 'scroll';
             document.body.scroll = 'yes';
             let modal = document.getElementById('transakFiatOnOffRamp');
-
             if (modal && modal.style) {
               modal.style.display = 'none';
               modal.innerHTML = '';
               modal.remove();
             }
-
             break;
           }
-
         case _constants.EVENTS.TRANSAK_ORDER_CREATED:
           {
             eventEmitter.emit(_constants.EVENTS.TRANSAK_ORDER_CREATED, {
@@ -1571,7 +1559,6 @@ function handleMessage(event) {
             });
             break;
           }
-
         case _constants.EVENTS.TRANSAK_ORDER_CANCELLED:
           {
             eventEmitter.emit(_constants.EVENTS.TRANSAK_ORDER_CANCELLED, {
@@ -1580,7 +1567,6 @@ function handleMessage(event) {
             });
             break;
           }
-
         case _constants.EVENTS.TRANSAK_ORDER_FAILED:
           {
             eventEmitter.emit(_constants.EVENTS.TRANSAK_ORDER_FAILED, {
@@ -1589,7 +1575,6 @@ function handleMessage(event) {
             });
             break;
           }
-
         case _constants.EVENTS.TRANSAK_ORDER_SUCCESSFUL:
           {
             eventEmitter.emit(_constants.EVENTS.TRANSAK_ORDER_SUCCESSFUL, {
@@ -1598,7 +1583,6 @@ function handleMessage(event) {
             });
             break;
           }
-
         case _constants.EVENTS.TRANSAK_WIDGET_OPEN:
           {
             eventEmitter.emit(_constants.EVENTS.TRANSAK_WIDGET_OPEN, {
@@ -1607,16 +1591,22 @@ function handleMessage(event) {
             });
             break;
           }
-
+        case 'WALLET_REDIRECTION':
+          {
+            eventEmitter.emit(_constants.EVENTS.TRANSAK_WALLET_REDIRECTION, {
+              status: event.data.data,
+              eventName: _constants.EVENTS.TRANSAK_WALLET_REDIRECTION
+            });
+            break;
+          }
         default:
           {}
       }
     }
   }
 }
-
 var _default = TransakSDK;
 exports.default = _default;
 
-},{"../package.json":7,"./assets/css":8,"./assets/svg":9,"./constants":13,"events":1,"query-string":4}]},{},[14])(14)
+},{"../package.json":7,"./assets/css":8,"./assets/svg":9,"./constants":13,"events":2,"query-string":5}]},{},[14])(14)
 });
