@@ -1,4 +1,4 @@
-#idea
+# IDE
 .idea
 .vscode
 
@@ -9,6 +9,9 @@ coverage
 # Dependency directories
 node_modules
 .yarn
+
+# Build & Deploy
+dist
 
 # misc
 .DS_Store

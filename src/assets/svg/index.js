@@ -14,4 +14,3 @@ let closeSVGIcon  = `<svg version="1.1" fill="currentColor" id="Capa_1" xmlns="h
 </svg>`;
 
 export {closeSVGIcon}
-
