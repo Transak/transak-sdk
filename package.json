@@ -1,7 +1,6 @@
 {
-  "private": true,
   "name": "@transak/transak-sdk",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Transak SDK that allows you to easily integrate the fiat on/ramp",
   "main": "dist/sdk.js",
   "scripts": {
