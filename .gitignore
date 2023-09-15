@@ -1,4 +1,4 @@
-#idea
+# IDE
 .idea
 .vscode
 
@@ -10,5 +10,8 @@ coverage
 node_modules
 .yarn
 
-# misc
+# Build
+lib
+
+# Misc
 .DS_Store
