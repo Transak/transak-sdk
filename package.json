@@ -1,37 +1,47 @@
 {
   "name": "@transak/transak-sdk",
-  "version": "1.4.1",
-  "description": "Transak SDK that allows you to easily integrate the fiat on/ramp",
-  "main": "dist/sdk.js",
-  "scripts": {
-    "eslint": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "eslint:fix": "yarn eslint --fix",
-    "build": "browserify ./src/index.js -o ./dist/sdk.js -p esmify -s TransakSDK"
+  "version": "2.0.0",
+  "description": "Transak SDK that allows you to easily integrate fiat on/off ramp",
+  "type": "module",
+  "types": "lib/index.d.ts",
+  "main": "lib/index.cjs",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./lib/index.d.ts",
+        "default": "./lib/index.js"
+      },
+      "require": {
+        "types": "./lib/index.d.cts",
+        "default": "./lib/index.cjs"
+      }
+    }
   },
-  "repository": {
-    "url": "https://github.com/Transak/transak-sdk"
-  },
+  "files": [
+    "lib/**/*"
+  ],
   "engines": {
-    "node": ">=10.0.0"
+    "node": ">=16.0.0"
+  },
+  "scripts": {
+    "eslint": "eslint . --ext .ts",
+    "eslint:fix": "yarn eslint --fix",
+    "build": "tsc && tsup",
+    "prepack": "yarn run build"
   },
   "author": "Transak",
   "license": "ISC",
-  "keywords": [
-    "crypto",
-    "cryptocurrency",
-    "fiat",
-    "on",
-    "off",
-    "ramp"
-  ],
+  "repository": {
+    "url": "https://github.com/Transak/transak-sdk"
+  },
   "dependencies": {
+    "@types/events": "^3.0.0",
     "events": "^3.3.0",
     "query-string": "^8.1.0"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^6.7.0",
     "@typescript-eslint/parser": "^6.7.0",
-    "browserify": "^17.0.0",
     "eslint": "^8.49.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-airbnb-typescript": "^17.1.0",
@@ -43,19 +53,18 @@
     "eslint-plugin-promise": "^6.1.1",
     "eslint-plugin-testing-library": "^6.0.1",
     "eslint-plugin-vitest": "^0.3.1",
-    "esmify": "^2.1.1",
-    "typescript": "^5.2.2"
+    "prettier": "^3.0.3",
+    "tsup": "^7.2.0",
+    "typescript": "^5.2.2",
+    "vitest": "^0.34.5"
   },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  }
+  "keywords": [
+    "crypto",
+    "cryptocurrency",
+    "fiat",
+    "on",
+    "off",
+    "ramp"
+  ],
+  "packageManager": "yarn@3.6.3"
 }

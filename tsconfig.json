@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "lib": ["ES2022", "DOM"],
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "bundler",
+
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+
+    /* Linting */
+    "strict": true,
+
+    /* Path aliases */
+    "baseUrl": "./src",
+    "paths": {
+      "Assets/*": ["Assets/*"],
+      "Constants/*": ["Constants/*"],
+      "Types/*": ["Types/*"],
+      "Utils/*": ["Utils/*"]
+    }
+  },
+  "include": [
+    "src/**/*",
+    "tsup.config.json"
+  ]
+}

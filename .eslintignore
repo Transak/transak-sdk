@@ -10,8 +10,8 @@ coverage
 node_modules
 .yarn
 
-# Build & Deploy
-dist
+# Build
+lib
 
-# misc
+# Misc
 .DS_Store
