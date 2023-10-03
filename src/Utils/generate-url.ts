@@ -10,12 +10,26 @@ export function generateURL(configData: TransakConfig) {
 
   // TODO: Remove this logic after enforcing strict alignment to Query Param docs
   Object.keys(configData).forEach((key) => {
+    if(key === 'email'){
+      // @ts-ignore
+      configData[key] = encodeURIComponent(configData[key]);
+    }
+
+    if(key === 'redirectURL'){
+      // @ts-ignore
+      configData[key] = encodeURIComponent(configData[key]);
+    }
+
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     if (configData[key] instanceof Object) {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       partnerData[key] = JSON.stringify(configData[key]);
+      if(key === 'userData'){
+      // @ts-ignore
+        partnerData[key] = encodeURIComponent(partnerData[key]);
+      }
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
