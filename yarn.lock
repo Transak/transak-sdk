@@ -527,11 +527,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@transak/transak-sdk@workspace:."
   dependencies:
-    "@types/events": ^3.0.0
+    "@types/events": ^3.0.1
     "@types/pako": ^2.0.1
-    "@typescript-eslint/eslint-plugin": ^6.7.0
-    "@typescript-eslint/parser": ^6.7.0
-    eslint: ^8.49.0
+    "@typescript-eslint/eslint-plugin": ^6.7.4
+    "@typescript-eslint/parser": ^6.7.4
+    eslint: ^8.50.0
     eslint-config-airbnb-base: ^15.0.0
     eslint-config-airbnb-typescript: ^17.1.0
     eslint-config-prettier: ^9.0.0
@@ -540,15 +540,15 @@ __metadata:
     eslint-plugin-no-relative-import-paths: ^1.5.2
     eslint-plugin-prettier: ^5.0.0
     eslint-plugin-promise: ^6.1.1
-    eslint-plugin-testing-library: ^6.0.1
-    eslint-plugin-vitest: ^0.3.1
+    eslint-plugin-testing-library: ^6.0.2
+    eslint-plugin-vitest: ^0.3.2
     events: ^3.3.0
     pako: ^2.1.0
     prettier: ^3.0.3
     query-string: ^8.1.0
     tsup: ^7.2.0
     typescript: ^5.2.2
-    vitest: ^0.34.5
+    vitest: ^0.34.6
   languageName: unknown
   linkType: soft
 
@@ -568,7 +568,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/events@npm:^3.0.0":
+"@types/events@npm:^3.0.1":
   version: 3.0.1
   resolution: "@types/events@npm:3.0.1"
   checksum: 68546116c3d00c47bacda1b475e5a01c30eb6cebfa00609725f7446d3ff4d448d8209f426117c0c7767ac97cdf494548b53c8dbd82a48336a4aac2664b9068b7
@@ -610,7 +610,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/eslint-plugin@npm:^6.7.0":
+"@typescript-eslint/eslint-plugin@npm:^6.7.4":
   version: 6.7.4
   resolution: "@typescript-eslint/eslint-plugin@npm:6.7.4"
   dependencies:
@@ -635,7 +635,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/parser@npm:^6.7.0":
+"@typescript-eslint/parser@npm:^6.7.4":
   version: 6.7.4
   resolution: "@typescript-eslint/parser@npm:6.7.4"
   dependencies:
@@ -1910,7 +1910,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-testing-library@npm:^6.0.1":
+"eslint-plugin-testing-library@npm:^6.0.2":
   version: 6.0.2
   resolution: "eslint-plugin-testing-library@npm:6.0.2"
   dependencies:
@@ -1921,7 +1921,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-vitest@npm:^0.3.1":
+"eslint-plugin-vitest@npm:^0.3.2":
   version: 0.3.2
   resolution: "eslint-plugin-vitest@npm:0.3.2"
   dependencies:
@@ -1963,7 +1963,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint@npm:^8.49.0":
+"eslint@npm:^8.50.0":
   version: 8.50.0
   resolution: "eslint@npm:8.50.0"
   dependencies:
@@ -4660,7 +4660,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vitest@npm:^0.34.5":
+"vitest@npm:^0.34.6":
   version: 0.34.6
   resolution: "vitest@npm:0.34.6"
   dependencies:

@@ -1,6 +1,6 @@
 {
   "name": "@transak/transak-sdk",
-  "version": "2.0.0",
+  "version": "2.0.0-rc.0",
   "description": "Transak SDK that allows you to easily integrate fiat on/off ramp",
   "type": "module",
   "types": "lib/index.d.ts",
@@ -35,16 +35,16 @@
     "url": "https://github.com/Transak/transak-sdk"
   },
   "dependencies": {
-    "@types/events": "^3.0.0",
+    "@types/events": "^3.0.1",
     "events": "^3.3.0",
     "pako": "^2.1.0",
     "query-string": "^8.1.0"
   },
   "devDependencies": {
     "@types/pako": "^2.0.1",
-    "@typescript-eslint/eslint-plugin": "^6.7.0",
-    "@typescript-eslint/parser": "^6.7.0",
-    "eslint": "^8.49.0",
+    "@typescript-eslint/eslint-plugin": "^6.7.4",
+    "@typescript-eslint/parser": "^6.7.4",
+    "eslint": "^8.50.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-airbnb-typescript": "^17.1.0",
     "eslint-config-prettier": "^9.0.0",
@@ -53,12 +53,12 @@
     "eslint-plugin-no-relative-import-paths": "^1.5.2",
     "eslint-plugin-prettier": "^5.0.0",
     "eslint-plugin-promise": "^6.1.1",
-    "eslint-plugin-testing-library": "^6.0.1",
-    "eslint-plugin-vitest": "^0.3.1",
+    "eslint-plugin-testing-library": "^6.0.2",
+    "eslint-plugin-vitest": "^0.3.2",
     "prettier": "^3.0.3",
     "tsup": "^7.2.0",
     "typescript": "^5.2.2",
-    "vitest": "^0.34.5"
+    "vitest": "^0.34.6"
   },
   "keywords": [
     "crypto",
