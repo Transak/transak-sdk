@@ -15,6 +15,7 @@ node_modules
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+package-lock.json
 
 # Build
 lib
