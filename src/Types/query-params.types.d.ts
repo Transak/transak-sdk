@@ -1,3 +1,34 @@
+type User = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  mobileNumber: string;
+  dob: string;
+  address: {
+    addressLine1: string;
+    addressLine2: string;
+    city: string;
+    state: string;
+    postCode: string;
+    countryCode: string;
+  };
+};
+
+type WalletAddresses = {
+  networks?: Record<string, { address: string; addressAdditionalData?: string }>;
+  coins?: Record<string, { address: string; addressAdditionalData?: string }>;
+};
+
+type NFT = {
+  imageURL?: string;
+  nftName?: string;
+  collectionAddress: string;
+  tokenID: string[] | number[];
+  price: number[];
+  quantity: number;
+  nftType: string;
+};
+
 export type QueryParams = {
   apiKey: string;
   exchangeScreenTitle?: string;
@@ -19,7 +50,7 @@ export type QueryParams = {
   isFeeCalculationHidden?: boolean;
   hideExchangeScreen?: boolean;
   email?: string;
-  userData?: string;
+  userData?: User;
   isAutoFillUserData?: boolean;
   themeColor?: string;
   hideMenu?: boolean;
@@ -29,7 +60,7 @@ export type QueryParams = {
   defaultFiatAmount?: number;
   fiatAmount?: number;
   walletAddress?: string;
-  walletAddressesData?: string;
+  walletAddressesData?: WalletAddresses;
   disableWalletAddressForm?: boolean;
   isNFT?: boolean;
   tokenId?: number;
@@ -37,7 +68,7 @@ export type QueryParams = {
   contractAddress?: string;
   calldata?: string;
   smartContractAddress?: string;
-  nftData?: string;
+  nftData?: NFT[];
   estimatedGasLimit?: number;
   cryptoAmount?: number;
   walletRedirection?: boolean;
