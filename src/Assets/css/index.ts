@@ -1,4 +1,8 @@
 export function getCSS(themeColor: string, width: string, height: string) {
+  const closeIconHeight = 36;
+  const closeIconHeightOnePart = 36 / 3;
+  const closeIconHeightTwoParts = (36 / 3) * 2;
+
   return `
     #transakRoot {
       z-index: 9997;
@@ -13,19 +17,20 @@ export function getCSS(themeColor: string, width: string, height: string) {
     .transak-modal {
       z-index: 9998;
       position: fixed;
+      width: ${width};
+      height: calc(${height} - ${closeIconHeightTwoParts}px);
       top: 50%;
       left: 50%;
-      width: ${width};
-      height: ${height};
-      transform: translate(-50%, -50%);
+      transform: translate(-50%, calc(-50% - ${closeIconHeightOnePart}px));
+      margin-top: ${closeIconHeightTwoParts}px;
     }
 
     #transakCloseIcon {
       z-index: 9999;
       position: absolute;
       width: 36px;
-      height: 36px;
-      top: -24px;
+      height: ${closeIconHeight}px;
+      top: -${closeIconHeightTwoParts}px;
       right: 0;
       transition: 0.5s;
       color: #${themeColor};
@@ -51,11 +56,7 @@ export function getCSS(themeColor: string, width: string, height: string) {
     @media screen and (max-width: 600px) {
       .transak-modal {
         width: 100%;
-        height: calc(100% - 24px);
-        bottom: 0;
-        top: revert;
-        left: revert;
-        transform: revert;
+        height: calc(100% - ${closeIconHeightTwoParts}px);
       }
 
       #transakIframe{
