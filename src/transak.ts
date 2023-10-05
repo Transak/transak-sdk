@@ -21,8 +21,7 @@ class Transak {
 
   static readonly ENVIRONMENTS = Environments;
 
-  // This is not made static for backward compatibility
-  readonly EVENTS = Events;
+  static readonly EVENTS = Events;
 
   constructor(transakConfig: TransakConfig) {
     if (!transakConfig?.apiKey) throw new Error('[Transak SDK] => Please enter your API Key');
@@ -30,8 +29,21 @@ class Transak {
     this.#config = transakConfig;
   }
 
+  static on = (type: '*' | keyof typeof Events, cb: (data: unknown) => void) => {
+    if (type === '*') {
+      (Object.keys(Events) as (keyof typeof Events)[]).forEach((eventName) => {
+        eventEmitter.on(Events[eventName], cb);
+      });
+    } else if (Events[type]) {
+      eventEmitter.on(type, cb);
+    }
+  };
+
   init = () => {
-    this.openModal();
+    if (!this.#isInitialized) {
+      this.openModal();
+      this.#isInitialized = true;
+    }
   };
 
   openModal = () => {
@@ -40,12 +52,12 @@ class Transak {
     this.#styleElement = setStyle(this.#config);
     this.#rootElement = renderModal(this.#config, this.#closeRequest);
     this.#iframeElement = document.getElementById('transakIframe') as HTMLIFrameElement;
-    this.#isInitialized = true;
   };
 
   close = () => {
     this.#styleElement?.remove();
     this.#rootElement?.remove();
+    this.#isInitialized = false;
   };
 
   #closeRequest = () => {
@@ -56,18 +68,6 @@ class Transak {
       },
       '*',
     );
-  };
-
-  // This is not made static for backward compatibility
-  // eslint-disable-next-line class-methods-use-this
-  on = (type: '*' | keyof typeof Events, cb: (data: unknown) => void) => {
-    if (type === '*') {
-      (Object.keys(Events) as (keyof typeof Events)[]).forEach((eventName) => {
-        eventEmitter.on(Events[eventName], cb);
-      });
-    } else if (Events[type]) {
-      eventEmitter.on(type, cb);
-    }
   };
 }
 

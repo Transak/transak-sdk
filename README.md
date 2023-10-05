@@ -29,12 +29,12 @@ let transak = new Transak(transakConfig);
 transak.init();
 
 // To get all the events
-transak.on('*', (data) => {
+Transak.on('*', (data) => {
   console.log(data);
 });
 
 // This will trigger when the user closed the widget
-transak.on(transak.EVENTS.TRANSAK_WIDGET_CLOSE, () => {
+Transak.on(Transak.EVENTS.TRANSAK_WIDGET_CLOSE, () => {
   console.log('Transak SDK closed!');
 });
 
@@ -43,7 +43,7 @@ transak.on(transak.EVENTS.TRANSAK_WIDGET_CLOSE, () => {
 * This doesn't guarantee that payment has completed in all scenarios
 * If you want to close/navigate away, use the TRANSAK_ORDER_SUCCESSFUL event
 */
-transak.on(transak.EVENTS.TRANSAK_ORDER_CREATED, (orderData) => {
+Transak.on(Transak.EVENTS.TRANSAK_ORDER_CREATED, (orderData) => {
   console.log(orderData);
 });
 
@@ -51,7 +51,7 @@ transak.on(transak.EVENTS.TRANSAK_ORDER_CREATED, (orderData) => {
 * This will trigger when the user marks payment is made
 * You can close/navigate away at this event
 */
-transak.on(transak.EVENTS.TRANSAK_ORDER_SUCCESSFUL, (orderData) => {
+Transak.on(Transak.EVENTS.TRANSAK_ORDER_SUCCESSFUL, (orderData) => {
   console.log(orderData);
   transak.close();
 });
@@ -59,4 +59,8 @@ transak.on(transak.EVENTS.TRANSAK_ORDER_SUCCESSFUL, (orderData) => {
 
 Refer here for the full list of [customisation options](https://docs.transak.com/docs/query-parameters)
 
-For in-depth instructions on integrating Transak, view [our complete documentation.](https://docs.transak.com)
+For in-depth instructions on integrating Transak, view [our complete documentation.](https://docs.transak.com/docs/integration-options)
+
+## Migration Guide for v2
+
+[This guide](https://github.com/Transak/transak-sdk/wiki/Migration-Guide-for-v2) will help you to upgrade to v2 successfully!
