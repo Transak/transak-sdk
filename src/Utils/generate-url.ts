@@ -1,41 +1,59 @@
 import qs from 'query-string';
-import Pako from 'pako';
+import pako from 'pako';
 import { WebAppUrls } from 'Constants/web-app-urls';
 import { TransakConfig } from 'Types/sdk-config.types';
 import { Environments } from 'Constants/environments';
 
 export function generateURL(configData: TransakConfig) {
   const { environment = Environments.STAGING } = configData;
-  const partnerData = {};
+  const queryParams = {};
   let queryString = '';
 
-  // TODO: Remove this logic after enforcing strict alignment to Query Param docs
-  Object.keys(configData).forEach((key) => {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    if (['walletAddressesData', 'userData', 'nftData'].includes(key)) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      partnerData[key] = JSON.stringify(configData[key]);
-      if (key === 'nftData') {
+  (Object.keys(configData) as (keyof TransakConfig)[]).forEach((key) => {
+    if (['environment', 'widgetWidth', 'widgetHeight'].includes(key)) return;
+
+    if (['walletAddressesData', 'userData'].includes(key)) {
+      try {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        partnerData[key] = btoa(configData[key]);
+        queryParams[key] = JSON.stringify(configData[key]);
+      } catch (e) {
+        /* empty */
       }
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    } else partnerData[key] = configData[key];
-  });
 
-  if (configData && configData.calldata) {
-    const compressCallData = Pako.deflate(configData.calldata);
+      return;
+    }
+
+    if (['nftData'].includes(key)) {
+      try {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        queryParams[key] = btoa(JSON.stringify(configData[key]));
+      } catch (e) {
+        /* empty */
+      }
+
+      return;
+    }
+
+    if (['calldata'].includes(key)) {
+      try {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        queryParams[key] = btoa(String.fromCharCode.apply(null, pako.deflate(configData[key])));
+      } catch (e) {
+        /* empty */
+      }
+
+      return;
+    }
+
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    partnerData.calldata = compressCallData.toLocaleString();
-  }
+    queryParams[key] = configData[key];
+  });
 
-  queryString = qs.stringify(partnerData, { arrayFormat: 'comma' });
+  queryString = qs.stringify(queryParams, { arrayFormat: 'comma' });
 
   return `${WebAppUrls[environment]}?${queryString}`;
 }
