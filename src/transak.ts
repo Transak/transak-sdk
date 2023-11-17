@@ -17,6 +17,8 @@ class Transak {
 
   #iframeElement?: HTMLIFrameElement;
 
+  #handleMessage: (event: MessageEvent<{ event_id: Events; data: unknown }>) => void;
+
   #isInitialized = false;
 
   static readonly ENVIRONMENTS = Environments;
@@ -27,6 +29,7 @@ class Transak {
     if (!transakConfig?.apiKey) throw new Error('[Transak SDK] => Please enter your API Key');
 
     this.#config = transakConfig;
+    this.#handleMessage = makeHandleMessage(eventEmitter, this.close);
   }
 
   static on = (type: '*' | keyof typeof Events, cb: (data: unknown) => void) => {
@@ -47,7 +50,7 @@ class Transak {
   };
 
   openModal = () => {
-    window.addEventListener('message', makeHandleMessage(eventEmitter, this.close));
+    window.addEventListener('message', this.#handleMessage);
 
     this.#styleElement = setStyle(this.#config);
     this.#rootElement = renderModal(this.#config, this.#closeRequest);
@@ -57,6 +60,7 @@ class Transak {
   close = () => {
     this.#styleElement?.remove();
     this.#rootElement?.remove();
+    this.#removeEventListener();
     this.#isInitialized = false;
   };
 
@@ -68,6 +72,11 @@ class Transak {
       },
       '*',
     );
+  };
+
+  #removeEventListener = () => {
+    eventEmitter.removeAllListeners();
+    window.removeEventListener('message', this.#handleMessage);
   };
 }
 
