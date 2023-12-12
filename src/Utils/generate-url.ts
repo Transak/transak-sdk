@@ -24,7 +24,7 @@ export function generateURL(configData: TransakConfig) {
       return;
     }
 
-    if (['nftData'].includes(key)) {
+    if (['nftData', 'sourceTokenData', 'cryptoCurrencyData'].includes(key)) {
       try {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore

@@ -1,6 +1,6 @@
 {
   "name": "@transak/transak-sdk",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Transak SDK that allows you to easily integrate fiat on/off ramp",
   "type": "module",
   "types": "lib/index.d.ts",
