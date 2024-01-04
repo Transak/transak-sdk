@@ -29,6 +29,8 @@ type NFT = {
   nftType: string;
 };
 
+type ColorMode = 'LIGHT' | 'DARK';
+
 export type QueryParams = {
   apiKey: string;
   exchangeScreenTitle?: string;
@@ -72,4 +74,12 @@ export type QueryParams = {
   estimatedGasLimit?: number;
   cryptoAmount?: number;
   walletRedirection?: boolean;
+  referrerDomain?: string;
+  colorMode?: ColorMode;
+  backgroundColors?: string | string[];
+  textColors?: string | string[];
+  borderColors?: string | string[];
+  isTransakOne?: boolean;
+  sourceTokenData?: string;
+  cryptoCurrencyData?: string;
 };

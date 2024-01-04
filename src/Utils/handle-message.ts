@@ -70,6 +70,15 @@ export function makeHandleMessage(eventEmitter: EventEmitter, close: () => void)
 
           break;
         }
+
+        case Events.TRANSAK_USER_INFO_RECEIVED: {
+          eventEmitter.emit(Events.TRANSAK_USER_INFO_RECEIVED, {
+            eventName: Events.TRANSAK_USER_INFO_RECEIVED,
+            status: event.data.data,
+          });
+
+          break;
+        }
       }
     }
   };
