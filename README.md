@@ -28,7 +28,7 @@ let transak = new Transak(transakConfig);
 
 transak.init();
 
-// To get all the events
+// To get all SDK events
 Transak.on('*', (data) => {
   console.log(data);
 });

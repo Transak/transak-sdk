@@ -64,14 +64,16 @@ class Transak {
     this.#isInitialized = false;
   };
 
+  getUser = () => {
+    this.#iframeElement?.contentWindow?.postMessage({ event_id: Events.TRANSAK_GET_USER_REQUEST }, '*');
+  };
+
+  logoutUser = () => {
+    this.#iframeElement?.contentWindow?.postMessage({ event_id: Events.TRANSAK_LOGOUT_USER_REQUEST }, '*');
+  };
+
   #closeRequest = () => {
-    this.#iframeElement?.contentWindow?.postMessage(
-      {
-        event_id: Events.TRANSAK_WIDGET_CLOSE_REQUEST,
-        data: true,
-      },
-      '*',
-    );
+    this.#iframeElement?.contentWindow?.postMessage({ event_id: Events.TRANSAK_WIDGET_CLOSE_REQUEST }, '*');
   };
 
   #removeEventListener = () => {
