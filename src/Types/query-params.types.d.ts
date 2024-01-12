@@ -20,10 +20,10 @@ type WalletAddresses = {
 };
 
 type NFT = {
+  tokenID: string[];
   imageURL?: string;
   nftName?: string;
   collectionAddress: string;
-  tokenID: string[] | number[];
   price: number[];
   quantity: number;
   nftType: string;
@@ -102,6 +102,6 @@ export type QueryParams = {
   isTransakOne?: boolean;
   sourceTokenData?: SourceTokenData[];
   cryptoCurrencyData?: CryptoCurrencyData[];
-  contractID?: string;
+  contractId?: string;
   tokenData?: TokenData[];
 };
