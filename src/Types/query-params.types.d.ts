@@ -31,6 +31,26 @@ type NFT = {
 
 type ColorMode = 'LIGHT' | 'DARK';
 
+type SourceTokenData = {
+  sourceTokenCode: string;
+  sourceTokenAmount: number;
+};
+
+type CryptoCurrencyData = {
+  cryptoCurrencyCode: string;
+  cryptoCurrencyName: string;
+  cryptoCurrencyImageURL: string;
+};
+
+type TokenData = {
+  tokenID: string[];
+  collectionAddress: string;
+  marketplace: string;
+  normalizeRoyalties: boolean;
+  nftName?: string;
+  nftImage?: string;
+};
+
 export type QueryParams = {
   apiKey: string;
   exchangeScreenTitle?: string;
@@ -80,6 +100,8 @@ export type QueryParams = {
   textColors?: string | string[];
   borderColors?: string | string[];
   isTransakOne?: boolean;
-  sourceTokenData?: string;
-  cryptoCurrencyData?: string;
+  sourceTokenData?: SourceTokenData[];
+  cryptoCurrencyData?: CryptoCurrencyData[];
+  contractID?: string;
+  tokenData?: TokenData[];
 };
