@@ -53,34 +53,32 @@ class Transak {
   };
 
   initIframe(container: HTMLElement) {
-    if(!(container instanceof Element)) throw new Error('[Transak SDK] => container is not Element');
+    if (!(container instanceof Element)) throw new Error('[Transak SDK] => container is not Element');
 
     if (!this.#isInitialized) {
-      this.#iframeElement = renderIframe(container, this.#config)
+      this.#iframeElement = renderIframe(container, this.#config);
       this.#isInitialized = true;
-      return this.#iframeElement!
     }
+
+    return this.#iframeElement;
   }
 
   openModal = () => {
     window.addEventListener('message', this.#handleMessage);
 
     this.#styleElement = setStyle(this.#config);
-    
-    const {
-      modal,
-      rootElement
-    } = renderModal(this.#config, this.#closeRequest);
 
-    this.#rootElement = rootElement
-    this.#modalElement = modal
+    const { modal, rootElement } = renderModal(this.#config, this.#closeRequest);
 
-    this.#iframeElement = renderIframe(modal, this.#config)
-    
+    this.#rootElement = rootElement;
+    this.#modalElement = modal;
+
+    this.#iframeElement = renderIframe(modal, this.#config);
+
     return {
       modal: this.#modalElement,
-      modalRoot: this.#rootElement
-    }
+      modalRoot: this.#rootElement,
+    };
   };
 
   close = () => {
@@ -89,7 +87,7 @@ class Transak {
     this.#modalElement?.remove();
     this.#removeEventListener();
     this.#isInitialized = false;
-    this.#iframeElement = undefined
+    this.#iframeElement = undefined;
   };
 
   getUser = () => {

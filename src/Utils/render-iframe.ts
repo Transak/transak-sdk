@@ -8,8 +8,8 @@ export function renderIframe(container: HTMLElement, config: TransakConfig) {
   Object.assign(iframe, {
     id: 'transakIframe',
     allow: 'camera;microphone;payment',
-    src: url
-  })
+    src: url,
+  });
 
   return container.appendChild(iframe);
 }

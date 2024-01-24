@@ -6,9 +6,9 @@ export function renderModal(config: TransakConfig, closeRequest: () => void) {
 
   Object.assign(rootElement, {
     id: 'transakRoot',
-    onclick: () => closeRequest()
-  })
-  
+    onclick: () => closeRequest(),
+  });
+
   const modal = document.createElement('div');
   modal.innerHTML = `
     <div class="transak-modal">
@@ -21,6 +21,6 @@ export function renderModal(config: TransakConfig, closeRequest: () => void) {
 
   return {
     rootElement,
-    modal
+    modal,
   };
 }
