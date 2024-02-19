@@ -21,12 +21,12 @@ type WalletAddresses = {
 
 type NFT = {
   tokenID: string[];
-  imageURL?: string;
-  nftName?: string;
   collectionAddress: string;
   price: number[];
   quantity: number;
   nftType: string;
+  nftName?: string;
+  imageURL?: string;
 };
 
 type ColorMode = 'LIGHT' | 'DARK';
@@ -48,7 +48,7 @@ type TokenData = {
   marketplace: string;
   normalizeRoyalties: boolean;
   nftName?: string;
-  nftImage?: string;
+  imageURL?: string;
 };
 
 export type QueryParams = {
