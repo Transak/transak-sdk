@@ -8,7 +8,6 @@ coverage
 
 # Dependency directories
 node_modules
-.yarn
 
 # Build
 lib
