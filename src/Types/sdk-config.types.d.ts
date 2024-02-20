@@ -5,4 +5,5 @@ export type TransakConfig = {
   environment: Environments.STAGING | Environments.PRODUCTION;
   widgetWidth?: string;
   widgetHeight?: string;
+  containerId?: string;
 } & QueryParams;

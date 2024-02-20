@@ -2,13 +2,11 @@
 
 A library for decentralised applications to onboard their global user base with fiat currency.
 
-## Installation
-
-```sh
-npm install @transak/transak-sdk
-```
-
 ## Example usage
+
+```html
+<div id="transakMount"></div>
+```
 
 ```ts
 import { TransakConfig, Transak } from '@transak/transak-sdk';
@@ -16,6 +14,7 @@ import { TransakConfig, Transak } from '@transak/transak-sdk';
 const transakConfig: TransakConfig = {
   apiKey: '<your-api-key>', // (Required)
   environment: Transak.ENVIRONMENTS.STAGING/Transak.ENVIRONMENTS.PRODUCTION, // (Required)
+  containerId: 'transakMount', // Id of the element where you want to initialize the iframe
   // .....
   // For the full list of customisation options check the link below
 };
@@ -49,7 +48,7 @@ Transak.on(Transak.EVENTS.TRANSAK_ORDER_CREATED, (orderData) => {
 */
 Transak.on(Transak.EVENTS.TRANSAK_ORDER_SUCCESSFUL, (orderData) => {
   console.log(orderData);
-  transak.close();
+  transak.cleanup();
 });
 ```
 
@@ -57,6 +56,18 @@ Refer here for the full list of [customisation options](https://docs.transak.com
 
 For in-depth instructions on integrating Transak, view [our complete documentation.](https://docs.transak.com/docs/integration-options)
 
-## Migration Guide for v2
+### Using Modal UI
 
-[This guide](https://github.com/Transak/transak-sdk/wiki/Migration-Guide-for-v2) will help you to upgrade to v2 successfully!
+If you want to use our modal UI, do not pass the `containerId` and use `transak.close()` instead of `transak.cleanup()`
+
+### React Gotchas
+
+Do not forget to clean up by using the `transak.cleanup()` or `transak.close()`
+
+```ts
+useEffect(() => {
+  return () => {
+    transak.cleanup();
+  };
+}, []);
+```

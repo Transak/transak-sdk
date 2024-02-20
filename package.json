@@ -1,6 +1,6 @@
 {
   "name": "@transak/transak-sdk",
-  "version": "2.2.0",
+  "version": "3.0.0",
   "description": "Transak SDK that allows you to easily integrate fiat on/off ramp",
   "type": "module",
   "types": "lib/index.d.ts",
@@ -28,7 +28,8 @@
     "eslint": "eslint . --ext .ts",
     "eslint:fix": "pnpm eslint --fix",
     "build": "tsc && tsup",
-    "prepack": "pnpm build"
+    "prepack": "pnpm build",
+    "packDev": "pnpm pack"
   },
   "author": "Transak",
   "license": "ISC",
