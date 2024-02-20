@@ -14,7 +14,7 @@ export function getCSS(themeColor: string, width: string, height: string) {
       background: rgba(0, 0, 0, 0.6);
     }
 
-    .transak-modal {
+    #transakModal {
       z-index: 9998;
       position: fixed;
       width: ${width};
@@ -54,7 +54,7 @@ export function getCSS(themeColor: string, width: string, height: string) {
     }
 
     @media screen and (max-width: 600px) {
-      .transak-modal {
+      #transakModal {
         width: 100%;
         height: calc(100% - ${closeIconHeightTwoParts}px);
       }

@@ -1,7 +1,7 @@
 import { getCSS } from 'Assets/css';
 import { TransakConfig } from 'Types/sdk-config.types';
 
-export function setStyle(config: TransakConfig) {
+export function renderInModalStyles(config: TransakConfig) {
   const { themeColor = '1461db', widgetWidth = '480px', widgetHeight = '650px' } = config;
   const style = document.createElement('style');
 
