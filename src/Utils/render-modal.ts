@@ -1,23 +1,26 @@
 import { closeIcon } from 'Assets/svg/close-icon';
-import { generateURL } from 'Utils/generate-url';
 import { TransakConfig } from 'Types/sdk-config.types';
 
 export function renderModal(config: TransakConfig, closeRequest: () => void) {
-  const url = generateURL(config);
-  const modal = document.createElement('div');
+  const rootElement = document.createElement('div');
 
-  modal.id = 'transakRoot';
+  Object.assign(rootElement, {
+    id: 'transakRoot',
+    onclick: () => closeRequest(),
+  });
+
+  const modal = document.createElement('div');
   modal.innerHTML = `
     <div class="transak-modal">
       ${closeIcon}
-      <iframe id="transakIframe" allow="camera;microphone;payment" src="${url}"></iframe>
     </div>
   `;
-  modal.onclick = () => closeRequest();
 
-  document.getElementsByTagName('body')[0].appendChild(modal);
-
+  document.getElementsByTagName('body')[0].appendChild(rootElement);
   document.getElementById('transakCloseIcon')?.addEventListener('click', () => closeRequest());
 
-  return modal;
+  return {
+    rootElement,
+    modal,
+  };
 }

@@ -5,6 +5,7 @@ import { setStyle } from 'Utils/set-style';
 import { renderModal } from 'Utils/render-modal';
 import { makeHandleMessage } from 'Utils/handle-message';
 import { TransakConfig } from 'Types/sdk-config.types';
+import { renderIframe } from 'Utils/render-iframe';
 
 const eventEmitter = new events.EventEmitter();
 
@@ -16,6 +17,8 @@ class Transak {
   #rootElement?: HTMLDivElement;
 
   #iframeElement?: HTMLIFrameElement;
+
+  #modalElement?: HTMLElement;
 
   #handleMessage: (event: MessageEvent<{ event_id: Events; data: unknown }>) => void;
 
@@ -49,19 +52,42 @@ class Transak {
     }
   };
 
+  initIframe(container: HTMLElement) {
+    if (!(container instanceof Element)) throw new Error('[Transak SDK] => container is not Element');
+
+    if (!this.#isInitialized) {
+      this.#iframeElement = renderIframe(container, this.#config);
+      this.#isInitialized = true;
+    }
+
+    return this.#iframeElement;
+  }
+
   openModal = () => {
     window.addEventListener('message', this.#handleMessage);
 
     this.#styleElement = setStyle(this.#config);
-    this.#rootElement = renderModal(this.#config, this.#closeRequest);
-    this.#iframeElement = document.getElementById('transakIframe') as HTMLIFrameElement;
+
+    const { modal, rootElement } = renderModal(this.#config, this.#closeRequest);
+
+    this.#rootElement = rootElement;
+    this.#modalElement = modal;
+
+    this.#iframeElement = renderIframe(modal, this.#config);
+
+    return {
+      modal: this.#modalElement,
+      modalRoot: this.#rootElement,
+    };
   };
 
   close = () => {
     this.#styleElement?.remove();
     this.#rootElement?.remove();
+    this.#modalElement?.remove();
     this.#removeEventListener();
     this.#isInitialized = false;
+    this.#iframeElement = undefined;
   };
 
   getUser = () => {
