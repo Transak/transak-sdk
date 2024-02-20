@@ -1,12 +1,15 @@
 {
+  "clean": true,
+  "dts": true,
   "entry": [
     "src/index.ts"
   ],
+  "format": [
+    "cjs",
+    "esm"
+  ],
   "minify": true,
   "outDir": "lib",
-  "format": ["cjs", "esm"],
-  "dts": true,
   "sourcemap": true,
-  "splitting": true,
-  "clean": true
+  "splitting": true
 }

@@ -5,11 +5,7 @@ A library for decentralised applications to onboard their global user base with 
 ## Installation
 
 ```sh
-# Using yarn
-$ yarn add @transak/transak-sdk
-
-# Using npm
-$ npm install @transak/transak-sdk
+npm install @transak/transak-sdk
 ```
 
 ## Example usage
