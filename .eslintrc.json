@@ -1,5 +1,5 @@
 {
-  "plugins": ["no-relative-import-paths", "prettier", "vitest", "testing-library"],
+  "plugins": ["no-relative-import-paths", "prettier"],
   "extends": [
     "airbnb-base",
     "airbnb-typescript/base",
@@ -9,15 +9,6 @@
     "plugin:eslint-comments/recommended",
     "plugin:promise/recommended",
     "plugin:prettier/recommended"
-  ],
-  "overrides": [
-    {
-      "files": ["**/__tests__/**/*"],
-      "extends": [
-        "plugin:vitest/recommended",
-        "plugin:testing-library/dom"
-      ]
-    }
   ],
   "rules": {
     "import/prefer-default-export": "off",
