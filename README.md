@@ -52,9 +52,9 @@ Transak.on(Transak.EVENTS.TRANSAK_ORDER_SUCCESSFUL, (orderData) => {
 });
 ```
 
-Refer here for the full list of [customisation options](https://docs.transak.com/docs/query-parameters)
+Refer here for the full list of [customisation options](https://docs.transak.com/docs/sdk)
 
-For in-depth instructions on integrating Transak, view [our complete documentation.](https://docs.transak.com/docs/integration-options)
+For in-depth instructions on integrating Transak, view [our complete documentation.](https://docs.transak.com/docs/web-integration#transak-sdk-reactvueangularts)
 
 ### Using Modal UI
 
