@@ -1,8 +1,8 @@
 import { EventEmitter } from 'events';
 import { Events } from 'Constants/events';
 
-export function makeHandleMessage(eventEmitter: EventEmitter, close: () => void) {
-  return function handleMessage(event: MessageEvent<{ event_id: Events; data: unknown }>) {
+export function makeHandleEvents(eventEmitter: EventEmitter, close: () => void) {
+  return function handleEvents(event: MessageEvent<{ event_id: Events; data: unknown }>) {
     if (event?.data?.event_id) {
       // eslint-disable-next-line default-case
       switch (event.data.event_id) {

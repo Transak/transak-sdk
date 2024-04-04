@@ -1,4 +1,4 @@
-export function getCSS(themeColor: string, width: string, height: string) {
+export function generateModalCss(themeColor: string, width: string, height: string) {
   const closeIconHeight = 36;
   const closeIconHeightOnePart = 36 / 3;
   const closeIconHeightTwoParts = (36 / 3) * 2;

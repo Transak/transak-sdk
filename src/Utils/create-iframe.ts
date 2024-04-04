@@ -1,8 +1,4 @@
-import { generateURL } from 'Utils/generate-url';
-import { TransakConfig } from 'Types/sdk-config.types';
-
-export function createIframe(config: TransakConfig) {
-  const src = generateURL(config);
+export function createIframe(src: string) {
   const iframe = document.createElement('iframe');
 
   Object.assign(iframe, {
