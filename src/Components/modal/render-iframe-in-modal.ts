@@ -1,13 +1,14 @@
 import { closeIcon } from 'Assets/svg/close-icon';
+import { generateGlobalTransakUrl } from 'Utils/generate-global-transak-url';
 import { createIframe } from 'Utils/create-iframe';
-import { renderInModalStyles } from 'Utils/render-in-modal.styles';
 import { TransakConfig } from 'Types/sdk-config.types';
+import { insertModalStyleToHtmlHead } from './insert-modal-style-to-html-head';
 
-export function renderInModal(config: TransakConfig, closeRequest: () => void) {
-  const styleElement = renderInModalStyles(config);
+export function renderIframeInModal(config: TransakConfig, closeRequest: () => void) {
+  const styleElement = insertModalStyleToHtmlHead(config);
   const rootElement = document.createElement('div');
   const modal = document.createElement('div');
-  const iframeElement = createIframe(config);
+  const iframeElement = createIframe(generateGlobalTransakUrl(config));
 
   Object.assign(modal, {
     id: 'transakModal',

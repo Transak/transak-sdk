@@ -17,6 +17,7 @@
     "baseUrl": "./src",
     "paths": {
       "Assets/*": ["Assets/*"],
+      "Components/*": ["Components/*"],
       "Constants/*": ["Constants/*"],
       "Types/*": ["Types/*"],
       "Utils/*": ["Utils/*"]

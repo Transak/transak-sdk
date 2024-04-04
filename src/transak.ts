@@ -1,9 +1,9 @@
 import events from 'events';
 import { Environments } from 'Constants/environments';
 import { Events } from 'Constants/events';
-import { createIframe } from 'Utils/create-iframe';
-import { makeHandleMessage } from 'Utils/handle-message';
-import { renderInModal } from 'Utils/render-in-modal';
+import { renderIframeInCustomContainer } from 'Components/custom-container/render-iframe-in-custom-container';
+import { makeHandleEvents } from 'Utils/handle-events';
+import { renderIframeInModal } from 'Components/modal/render-iframe-in-modal';
 import { TransakConfig } from 'Types/sdk-config.types';
 
 const eventEmitter = new events.EventEmitter();
@@ -29,7 +29,7 @@ class Transak {
     if (!transakConfig?.apiKey) throw new Error('[Transak SDK] => Please enter your API Key');
 
     this.#config = transakConfig;
-    this.#handleMessage = makeHandleMessage(eventEmitter, this.close);
+    this.#handleMessage = makeHandleEvents(eventEmitter, this.close);
   }
 
   static on = (type: '*' | keyof typeof Events, cb: (data: unknown) => void) => {
@@ -75,16 +75,13 @@ class Transak {
     window.addEventListener('message', this.#handleMessage);
 
     if (this.#config.containerId) {
-      const containerIdElement = document.getElementById(this.#config.containerId) as HTMLElement;
-      this.#iframeElement = createIframe(this.#config);
+      const { styleElement, iframeElement } = renderIframeInCustomContainer(this.#config);
 
-      if (containerIdElement) {
-        containerIdElement.appendChild(this.#iframeElement);
-      } else {
-        throw new Error('[Transak SDK] => Please enter a valid containerId');
-      }
+      this.#styleElement = styleElement;
+      this.#iframeElement = iframeElement;
     } else {
-      const { styleElement, rootElement, iframeElement } = renderInModal(this.#config, this.#closeRequest);
+      const { styleElement, rootElement, iframeElement } = renderIframeInModal(this.#config, this.#closeRequest);
+
       this.#styleElement = styleElement;
       this.#rootElement = rootElement;
       this.#iframeElement = iframeElement;
