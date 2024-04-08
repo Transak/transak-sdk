@@ -50,8 +50,9 @@ class Transak {
   };
 
   cleanup = () => {
+    this.#styleElement?.remove();
     this.#removeEventListener();
-    this.#iframeElement = undefined;
+    this.#iframeElement?.remove();
     this.#isInitialized = false;
   };
 
