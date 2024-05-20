@@ -79,6 +79,15 @@ export function makeHandleEvents(eventEmitter: EventEmitter, close: () => void) 
 
           break;
         }
+
+        case Events.TRANSAK_KYC_COMPLETE: {
+          eventEmitter.emit(Events.TRANSAK_KYC_COMPLETE, {
+            eventName: Events.TRANSAK_KYC_COMPLETE,
+            status: event.data.data,
+          });
+
+          break;
+        }
       }
     }
   };
