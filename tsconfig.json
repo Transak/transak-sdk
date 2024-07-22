@@ -14,13 +14,13 @@
     "strict": true,
 
     /* Path aliases */
-    "baseUrl": "./src",
     "paths": {
-      "Assets/*": ["Assets/*"],
-      "Components/*": ["Components/*"],
-      "Constants/*": ["Constants/*"],
-      "Types/*": ["Types/*"],
-      "Utils/*": ["Utils/*"]
+      "Assets/*": ["./src/Assets/*"],
+      "Components/*": ["./src/Components/*"],
+      "Constants/*": ["./src/Constants/*"],
+      "Types/*": ["./src/Types/*"],
+      "Utils/*": ["./src/Utils/*"],
+      "package.json": ["./package.json"]
     }
   },
   "include": [

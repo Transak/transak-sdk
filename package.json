@@ -1,6 +1,6 @@
 {
   "name": "@transak/transak-sdk",
-  "version": "3.1.1",
+  "version": "3.1.2",
   "description": "Transak SDK that allows you to easily integrate fiat on/off ramp",
   "type": "module",
   "types": "lib/index.d.ts",
@@ -20,7 +20,7 @@
   "engines": {
     "node": ">=18.0.0"
   },
-  "packageManager": "pnpm@8.15.3+sha256.fc4a49bd609550a41e14d20efbce802a4b892aa4cac877322de2f0924f122991",
+  "packageManager": "pnpm@9.5.0+sha256.fc4a49bd609550a41e14d20efbce802a4b892aa4cac877322de2f0924f122991",
   "files": [
     "lib/**/*"
   ],
