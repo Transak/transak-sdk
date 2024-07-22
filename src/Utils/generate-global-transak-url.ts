@@ -3,10 +3,12 @@ import pako from 'pako';
 import { WebAppUrls } from 'Constants/web-app-urls';
 import { TransakConfig } from 'Types/sdk-config.types';
 import { Environments } from 'Constants/environments';
+import packageJson from 'package.json';
 
 export function generateGlobalTransakUrl(configData: TransakConfig) {
+  const { name: sdkName, version: sdkVersion } = packageJson;
   const { environment = Environments.STAGING } = configData;
-  const queryParams = {};
+  const queryParams = { sdkName, sdkVersion };
   let queryString = '';
 
   (Object.keys(configData) as (keyof TransakConfig)[]).forEach((key) => {
