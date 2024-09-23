@@ -29,7 +29,7 @@ class Transak {
     if (!transakConfig?.apiKey) throw new Error('[Transak SDK] => Please enter your API Key');
 
     this.#config = transakConfig;
-    this.#handleMessage = makeHandleEvents(eventEmitter, this.close);
+    this.#handleMessage = makeHandleEvents(eventEmitter);
   }
 
   static on = (type: '*' | keyof typeof Events, cb: (data: unknown) => void) => {

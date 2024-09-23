@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
 import { Events } from 'Constants/events';
 
-export function makeHandleEvents(eventEmitter: EventEmitter, close: () => void) {
+export function makeHandleEvents(eventEmitter: EventEmitter) {
   return function handleEvents(event: MessageEvent<{ event_id: Events; data: unknown }>) {
     if (event?.data?.event_id) {
       // eslint-disable-next-line default-case
@@ -65,9 +65,6 @@ export function makeHandleEvents(eventEmitter: EventEmitter, close: () => void) 
             eventName: Events.TRANSAK_WIDGET_CLOSE,
             status: true,
           });
-
-          close();
-
           break;
         }
 
