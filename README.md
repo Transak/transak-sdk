@@ -9,7 +9,7 @@ A library for decentralised applications to onboard their global user base with 
 ```
 
 ```ts
-import { TransakConfig, Transak } from '@transak/transak-sdk';
+import { TransakConfig, Transak } from '@scalingparrots/transak-sdk';
 
 const transakConfig: TransakConfig = {
   apiKey: '<your-api-key>', // (Required)
