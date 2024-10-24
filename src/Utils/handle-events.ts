@@ -4,6 +4,7 @@ import { Events } from 'Constants/events';
 export function makeHandleEvents(eventEmitter: EventEmitter) {
   return function handleEvents(event: MessageEvent<{ event_id: unknown; data: unknown }>) {
     if (event?.data?.event_id) {
+      console.log(JSON.stringify(event));
       // eslint-disable-next-line default-case
       switch (event.data.event_id) {
         case Events.TRANSAK_WIDGET_INITIALISED: {
@@ -84,16 +85,6 @@ export function makeHandleEvents(eventEmitter: EventEmitter) {
           });
 
           break;
-        }
-        default: {
-          // Handle unknown event_id
-          eventEmitter.emit('UNKNOWN_EVENT_ID', {
-            eventName: 'UNKNOWN_EVENT_ID',
-            eventId: event.data.event_id,
-            data: event.data.data,
-          });
-          console.log('Unknown event id:', event.data.event_id);
-          console.log('Unknown event data:', event.data.data);
         }
       }
     }
