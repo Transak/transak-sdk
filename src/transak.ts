@@ -17,7 +17,7 @@ class Transak {
 
   #iframeElement?: HTMLIFrameElement;
 
-  #handleMessage: (event: MessageEvent<{ event_id: Events; data: unknown }>) => void;
+  #handleMessage: (event: MessageEvent<{ event_id: unknown; data: unknown }>) => void;
 
   #isInitialized = false;
 
