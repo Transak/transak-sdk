@@ -47,9 +47,6 @@ class Transak {
       this.#renderIframe();
       this.#isInitialized = true;
     }
-    if (this.#config.environment === Environments.PRODUCTION_ORDERS || this.#config.environment === Environments.STAGING_ORDERS) {
-      this.getUser();
-    }
   };
 
   cleanup = () => {
