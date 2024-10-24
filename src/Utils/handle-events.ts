@@ -15,6 +15,15 @@ export function makeHandleEvents(eventEmitter: EventEmitter) {
           break;
         }
 
+        case Events.TRANSAK_LOGIN_USER_REQUEST: {
+          eventEmitter.emit(Events.TRANSAK_LOGIN_USER_REQUEST, {
+            eventName: Events.TRANSAK_LOGIN_USER_REQUEST,
+            status: true,
+          });
+
+          break;
+        }
+
         case Events.TRANSAK_ORDER_CREATED: {
           eventEmitter.emit(Events.TRANSAK_ORDER_CREATED, {
             eventName: Events.TRANSAK_ORDER_CREATED,
