@@ -8,6 +8,14 @@ import { TransakConfig } from 'Types/sdk-config.types';
 
 const eventEmitter = new events.EventEmitter();
 
+// Override the emit method to intercept all events
+const originalEmit = eventEmitter.emit;
+
+eventEmitter.emit = function (eventName: string | symbol, ...args: any[]) {
+  console.log(`Event emitted: ${String(eventName)}`, args);
+  return originalEmit.call(this, eventName, ...args);
+};
+
 class Transak {
   readonly #config: TransakConfig;
 
