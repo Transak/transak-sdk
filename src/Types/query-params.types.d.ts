@@ -104,4 +104,5 @@ export type QueryParams = {
   cryptoCurrencyData?: CryptoCurrencyData[];
   contractId?: string;
   tokenData?: TokenData[];
+  isTransakStreamOffRamp?: boolean;
 };
