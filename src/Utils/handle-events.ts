@@ -9,7 +9,7 @@ export function makeHandleEvents(eventEmitter: EventEmitter) {
         case Events.TRANSAK_WIDGET_INITIALISED: {
           eventEmitter.emit(Events.TRANSAK_WIDGET_INITIALISED, {
             eventName: Events.TRANSAK_WIDGET_INITIALISED,
-            status: true,
+            status: event.data.data,
           });
 
           break;
@@ -63,7 +63,7 @@ export function makeHandleEvents(eventEmitter: EventEmitter) {
         case Events.TRANSAK_WIDGET_CLOSE: {
           eventEmitter.emit(Events.TRANSAK_WIDGET_CLOSE, {
             eventName: Events.TRANSAK_WIDGET_CLOSE,
-            status: true,
+            status: event.data.data,
           });
           break;
         }
