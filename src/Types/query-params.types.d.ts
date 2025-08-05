@@ -105,4 +105,6 @@ export type QueryParams = {
   contractId?: string;
   tokenData?: TokenData[];
   isTransakStreamOffRamp?: boolean;
+  kycShareToken?: string;
+  kycShareTokenProvider?: 'SUMSUB';
 };
