@@ -19,7 +19,7 @@ import { TransakConfig, Transak } from '@transak/transak-sdk';
 
 const transakConfig: TransakConfig = {
   apiKey: '<your-api-key>', // (Required)
-  environment: Transak.ENVIRONMENTS.STAGING/Transak.ENVIRONMENTS.PRODUCTION, // (Required)
+  environment: Transak.ENVIRONMENTS.STAGING / Transak.ENVIRONMENTS.PRODUCTION, // (Required)
   // .....
   // For the full list of customisation options check the link below
 };
@@ -39,22 +39,40 @@ Transak.on(Transak.EVENTS.TRANSAK_WIDGET_CLOSE, () => {
 });
 
 /*
-* This will trigger when the user has confirmed the order
-* This doesn't guarantee that payment has completed in all scenarios
-* If you want to close/navigate away, use the TRANSAK_ORDER_SUCCESSFUL event
-*/
+ * This will trigger when the user has confirmed the order
+ * This doesn't guarantee that payment has completed in all scenarios
+ * If you want to close/navigate away, use the TRANSAK_ORDER_SUCCESSFUL event
+ */
 Transak.on(Transak.EVENTS.TRANSAK_ORDER_CREATED, (orderData) => {
   console.log(orderData);
 });
 
 /*
-* This will trigger when the user marks payment is made
-* You can close/navigate away at this event
-*/
+ * This will trigger when the user marks payment is made
+ * You can close/navigate away at this event
+ */
 Transak.on(Transak.EVENTS.TRANSAK_ORDER_SUCCESSFUL, (orderData) => {
   console.log(orderData);
   transak.close();
 });
+```
+
+## Methods
+
+### `close()`
+
+Closes the widget and removes it from the DOM. Keeps event listeners active for re-initialization.
+
+```ts
+transak.close();
+```
+
+### `destroy()`
+
+Completely destroys the instance and cleans up all resources including event listeners.
+
+```ts
+transak.destroy();
 ```
 
 Refer here for the full list of [customisation options](https://docs.transak.com/docs/query-parameters)

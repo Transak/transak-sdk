@@ -60,8 +60,12 @@ class Transak {
   close = () => {
     this.#styleElement?.remove();
     this.#rootElement?.remove();
-    this.#removeEventListener();
     this.#isInitialized = false;
+  };
+
+  destroy = () => {
+    this.close();
+    this.#removeEventListener();
   };
 
   #closeRequest = () => {
