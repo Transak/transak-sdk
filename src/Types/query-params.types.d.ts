@@ -91,6 +91,7 @@ export type QueryParams = {
   calldata?: string;
   smartContractAddress?: string;
   nftData?: NFT[];
+  nftTransactionId?: string;
   estimatedGasLimit?: number;
   cryptoAmount?: number;
   walletRedirection?: boolean;
