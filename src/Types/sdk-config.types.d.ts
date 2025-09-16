@@ -1,9 +1,8 @@
-import { Environments } from 'Constants/environments';
-import { QueryParams } from 'Types/query-params.types';
-
 export type TransakConfig = {
-  environment: Environments.STAGING | Environments.PRODUCTION;
+  widgetUrl: string;
+  referrer: string;
   widgetWidth?: string;
   widgetHeight?: string;
   containerId?: string;
-} & QueryParams;
+  themeColor?: string;
+};

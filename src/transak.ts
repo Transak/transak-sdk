@@ -1,8 +1,6 @@
 import events from 'events';
-import { Environments } from 'Constants/environments';
 import { Events } from 'Constants/events';
 import { renderIframeInCustomContainer } from 'Components/custom-container/render-iframe-in-custom-container';
-import { makeHandleEvents } from 'Utils/handle-events';
 import { renderIframeInModal } from 'Components/modal/render-iframe-in-modal';
 import { TransakConfig } from 'Types/sdk-config.types';
 
@@ -17,27 +15,18 @@ class Transak {
 
   #iframeElement?: HTMLIFrameElement;
 
-  #handleMessage: (event: MessageEvent<{ event_id: Events; data: unknown }>) => void;
-
   #isInitialized = false;
-
-  static readonly ENVIRONMENTS = Environments;
 
   static readonly EVENTS = Events;
 
   constructor(transakConfig: TransakConfig) {
-    if (!transakConfig?.apiKey) throw new Error('[Transak SDK] => Please enter your API Key');
+    if (!transakConfig?.widgetUrl) throw new Error('[Transak SDK] => widgetUrl is required');
 
     this.#config = transakConfig;
-    this.#handleMessage = makeHandleEvents(eventEmitter);
   }
 
-  static on = (type: '*' | keyof typeof Events, cb: (data: unknown) => void) => {
-    if (type === '*') {
-      (Object.keys(Events) as (keyof typeof Events)[]).forEach((eventName) => {
-        eventEmitter.on(Events[eventName], cb);
-      });
-    } else if (Events[type]) {
+  static on = (type: keyof typeof Events, cb: (data: unknown) => void) => {
+    if (Events[type]) {
       eventEmitter.on(type, cb);
     }
   };
@@ -64,14 +53,6 @@ class Transak {
     this.#isInitialized = false;
   };
 
-  getUser = () => {
-    this.#iframeElement?.contentWindow?.postMessage({ event_id: Events.TRANSAK_GET_USER_REQUEST }, '*');
-  };
-
-  logoutUser = () => {
-    this.#iframeElement?.contentWindow?.postMessage({ event_id: Events.TRANSAK_LOGOUT_USER_REQUEST }, '*');
-  };
-
   #renderIframe = () => {
     window.addEventListener('message', this.#handleMessage);
 
@@ -96,6 +77,12 @@ class Transak {
   #removeEventListener = () => {
     eventEmitter.removeAllListeners();
     window.removeEventListener('message', this.#handleMessage);
+  };
+
+  #handleMessage = (event: MessageEvent<{ event_id: Events; data: unknown }>) => {
+    if (event?.data?.event_id && this.#isInitialized) {
+      eventEmitter.emit(event.data.event_id, event.data.data);
+    }
   };
 }
 

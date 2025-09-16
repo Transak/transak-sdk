@@ -1,6 +1,6 @@
 {
   "name": "@transak/transak-sdk",
-  "version": "3.2.2",
+  "version": "4.0.0",
   "description": "Transak SDK that allows you to easily integrate fiat on/off ramp",
   "type": "module",
   "types": "lib/index.d.ts",
@@ -18,15 +18,14 @@
     }
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.0.0"
   },
-  "packageManager": "pnpm@10.0.0+sha512.b8fef5494bd3fe4cbd4edabd0745df2ee5be3e4b0b8b08fa643aa3e4c6702ccc0f00d68fa8a8c9858a735a0032485a44990ed2810526c875e416f001b17df12b",
+  "packageManager": "pnpm@10.16.1+sha512.0e155aa2629db8672b49e8475da6226aa4bdea85fdcdfdc15350874946d4f3c91faaf64cbdc4a5d1ab8002f473d5c3fcedcd197989cf0390f9badd3c04678706",
   "files": [
     "lib/**/*"
   ],
   "scripts": {
-    "eslint": "eslint . --ext .ts",
-    "eslint:fix": "pnpm eslint --fix",
+    "eslint": "eslint . --ext .ts --fix",
     "build": "tsc && tsup",
     "prepack": "pnpm build",
     "packDev": "pnpm pack"
@@ -40,26 +39,24 @@
   },
   "dependencies": {
     "events": "^3.3.0",
-    "pako": "^2.1.0",
-    "query-string": "^9.1.1"
+    "query-string": "^9.3.0"
   },
   "devDependencies": {
     "@types/events": "^3.0.3",
-    "@types/pako": "^2.0.3",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",
-    "eslint": "^8.57.1",
+    "eslint": "~8.57.1",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-airbnb-typescript": "^18.0.0",
-    "eslint-config-prettier": "^10.0.1",
+    "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-eslint-comments": "^3.2.0",
-    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-no-relative-import-paths": "^1.6.1",
-    "eslint-plugin-prettier": "^5.2.3",
+    "eslint-plugin-prettier": "^5.5.4",
     "eslint-plugin-promise": "^7.2.1",
-    "prettier": "^3.4.2",
-    "tsup": "^8.3.5",
-    "typescript": "5.5.4"
+    "prettier": "^3.6.2",
+    "tsup": "^8.5.0",
+    "typescript": "~5.5.4"
   },
   "keywords": [
     "crypto",
