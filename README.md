@@ -2,7 +2,7 @@
 
 A JavaScript SDK for decentralized applications to onboard their global user base with fiat currency.
 
-## Migrating from v2.x
+## Migrating from v3.x
 
 - 🔗 **Widget URL Mandatory**: This SDK now only supports API-based Transak Widget URL. Please refer the detailed migration guide [here](https://docs.transak.com/docs/migration-to-api-based-transak-widget-url).
 
